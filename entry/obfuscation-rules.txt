@@ -1,0 +1,15 @@
+# Define project-level obfuscation rules here.
+# For details, see https://developer.huawei.com/consumer/cn/doc/harmonyos-guides-V5/source-obfuscation-V5
+
+# Obfuscation options:
+# -disable-obfuscation: disable all obfuscation
+# -enable-property-obfuscation: obfuscate property names
+# -enable-toplevel-obfuscation: obfuscate top-level variable and function names
+# -compact: remove unnecessary whitespace
+# -remove-log: remove all console.* statements
+# -print-namecache: print the name cache that contains the original and new names
+# -apply-namecache: reuse the given name cache
+
+# Keep options:
+# -keep-property-name: specifies property names that you want to keep
+# -keep-global-name: specifies names that you want to keep

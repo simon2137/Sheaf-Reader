@@ -1,0 +1,9 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Sheaf Reader (束阅) entry module",
+  "main": "",
+  "author": "",
+  "license": "BSD-3-Clause",
+  "dependencies": {}
+}

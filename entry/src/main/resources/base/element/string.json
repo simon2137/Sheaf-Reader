@@ -1,0 +1,244 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "An RSS reader for HarmonyOS tablets and 2-in-1 PCs"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Sheaf Reader"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Sheaf Reader"
+    },
+    {
+      "name": "app_name",
+      "value": "Sheaf Reader"
+    },
+    {
+      "name": "all_articles",
+      "value": "All Articles"
+    },
+    {
+      "name": "unread",
+      "value": "Unread"
+    },
+    {
+      "name": "starred",
+      "value": "Starred"
+    },
+    {
+      "name": "search_placeholder",
+      "value": "Search articles..."
+    },
+    {
+      "name": "add_feed",
+      "value": "Add Feed"
+    },
+    {
+      "name": "settings",
+      "value": "Settings"
+    },
+    {
+      "name": "refresh",
+      "value": "Refresh"
+    },
+    {
+      "name": "mark_all_read",
+      "value": "Mark All Read"
+    },
+    {
+      "name": "no_articles",
+      "value": "No articles"
+    },
+    {
+      "name": "loading",
+      "value": "Loading..."
+    },
+    {
+      "name": "feed_url_hint",
+      "value": "Feed URL"
+    },
+    {
+      "name": "feed_name_hint",
+      "value": "Feed Name (optional)"
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "confirm",
+      "value": "Confirm"
+    },
+    {
+      "name": "delete",
+      "value": "Delete"
+    },
+    {
+      "name": "group",
+      "value": "Group"
+    },
+    {
+      "name": "no_group",
+      "value": "No Group"
+    },
+    {
+      "name": "article_source",
+      "value": "Source"
+    },
+    {
+      "name": "article_date",
+      "value": "Date"
+    },
+    {
+      "name": "read_full_article",
+      "value": "Read Full Article"
+    },
+    {
+      "name": "open_in_browser",
+      "value": "Open in Browser"
+    },
+    {
+      "name": "star",
+      "value": "Star"
+    },
+    {
+      "name": "unstar",
+      "value": "Unstar"
+    },
+    {
+      "name": "mark_read",
+      "value": "Mark as Read"
+    },
+    {
+      "name": "mark_unread",
+      "value": "Mark as Unread"
+    },
+    {
+      "name": "dark_mode",
+      "value": "Dark Mode"
+    },
+    {
+      "name": "light_mode",
+      "value": "Light Mode"
+    },
+    {
+      "name": "system_default",
+      "value": "System Default"
+    },
+    {
+      "name": "fetch_interval",
+      "value": "Fetch Interval"
+    },
+    {
+      "name": "import_opml",
+      "value": "Import OPML"
+    },
+    {
+      "name": "export_opml",
+      "value": "Export OPML"
+    },
+    {
+      "name": "about",
+      "value": "About"
+    },
+    {
+      "name": "version",
+      "value": "Version"
+    },
+    {
+      "name": "license_info",
+      "value": "BSD-3-Clause License. Ported from Fluent Reader (yang991178/fluent-reader)."
+    },
+    {
+      "name": "fetching",
+      "value": "Fetching articles..."
+    },
+    {
+      "name": "fetch_success",
+      "value": "Fetch completed"
+    },
+    {
+      "name": "fetch_failed",
+      "value": "Fetch failed"
+    },
+    {
+      "name": "feed_added",
+      "value": "Feed added successfully"
+    },
+    {
+      "name": "feed_exists",
+      "value": "Feed already exists"
+    },
+    {
+      "name": "feed_invalid",
+      "value": "Invalid feed URL"
+    },
+    {
+      "name": "article_not_found",
+      "value": "Article not found"
+    },
+    {
+      "name": "back",
+      "value": "Back"
+    },
+    {
+      "name": "close",
+      "value": "Close"
+    },
+    {
+      "name": "minimize",
+      "value": "Minimize"
+    },
+    {
+      "name": "maximize",
+      "value": "Maximize"
+    },
+    {
+      "name": "restore",
+      "value": "Restore"
+    },
+    {
+      "name": "quit",
+      "value": "Quit"
+    },
+    {
+      "name": "keyboard_shortcuts",
+      "value": "Keyboard Shortcuts"
+    },
+    {
+      "name": "shortcut_next",
+      "value": "Next article"
+    },
+    {
+      "name": "shortcut_prev",
+      "value": "Previous article"
+    },
+    {
+      "name": "shortcut_star",
+      "value": "Star/Unstar"
+    },
+    {
+      "name": "shortcut_read",
+      "value": "Mark read/unread"
+    },
+    {
+      "name": "shortcut_refresh",
+      "value": "Refresh feeds"
+    },
+    {
+      "name": "shortcut_search",
+      "value": "Search"
+    },
+    {
+      "name": "shortcut_close",
+      "value": "Close article"
+    },
+    {
+      "name": "shortcut_help",
+      "value": "Show shortcuts"
+    }
+  ]
+}

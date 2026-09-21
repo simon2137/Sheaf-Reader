@@ -1,0 +1,7 @@
+{
+  "modelVersion": "5.0.0",
+  "description": "Sheaf Reader (束阅) - a Fluent Reader port for HarmonyOS tablets and 2-in-1 PCs",
+  "license": "BSD-3-Clause",
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,16 @@
+# Normalise line endings: the sources are committed as LF, so the checkout is
+# identical on Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.hap binary
+*.har binary
+*.hsp binary

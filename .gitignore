@@ -1,0 +1,32 @@
+# --- Build output ------------------------------------------------------------
+/build/
+/entry/build/
+/**/build/
+*.hap
+*.har
+*.hsp
+*.app
+
+# --- DevEco Studio / hvigor --------------------------------------------------
+.hvigor/
+.cache/
+oh_modules/
+**/oh_modules/
+local.properties
+*.iml
+.idea/
+.DS_Store
+
+# --- Node --------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# --- Verification harness (staged/emitted by verify/run.ps1) -----------------
+verify/out/
+verify/src/
+verify/entry-locales/
+
+# --- Device debug scratch (dumps, screenshots, one-off probes) ---------------
+.dsh-hdc/
+*.log

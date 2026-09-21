@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "面向平板与 PC 的鸿蒙 RSS 阅读器"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "束阅"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "束阅"
+    },
+    {
+      "name": "app_name",
+      "value": "束阅"
+    }
+  ]
+}

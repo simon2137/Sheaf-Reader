@@ -1,0 +1,38 @@
+Sheaf Reader (束阅)
+Copyright (c) 2026, simon2137
+
+This project — Sheaf Reader (束阅), formerly published as "Fluent Reader for
+HarmonyOS" — is an unofficial, community-made port of Fluent Reader to
+HarmonyOS Next (ArkTS / ArkUI). It is not affiliated with, endorsed by, or
+sponsored by the original author or by Huawei.
+
+Based on:
+  Fluent Reader — https://github.com/yang991178/fluent-reader
+  Copyright (c) 2020, Haoyuan Liu (yang991178)
+  Licensed under the BSD 3-Clause License (see LICENSE).
+
+What is derived from the original project:
+  * the application's behaviour, layout logic, data model and settings
+    semantics, ported from its TypeScript/React sources;
+  * the `en-US` / `zh-CN` message catalogues (the other 17 upstream locales
+    were dropped), including the upstream message keys;
+  * the strings, service integrations and keyboard shortcuts that the port
+    reproduces in order to behave like the original.
+
+What is not from the original project:
+  * the name "Sheaf Reader" / "束阅", all ArkTS/ArkUI code in this repository
+    (a re-implementation, not a transpilation), and the `com.sheafreader.hm`
+    bundle identifier;
+  * the application launcher icons under `AppScope/resources` and
+    `entry/src/main/resources/base/media/`, which are placeholders drawn for
+    this port.
+
+Renamed data markers (for anyone restoring an older backup):
+  * the backup format marker is `sheaf-reader-hm`; the pre-rename marker
+    `fluent-reader-hm` is still accepted on import.
+
+Third-party components:
+  * the 24x24 SVG icons under `entry/src/main/resources/base/media/` are icon
+    path data from Material Design Icons (Google), used under the Apache
+    License 2.0 — see `third_party/material-design-icons/`.
+
