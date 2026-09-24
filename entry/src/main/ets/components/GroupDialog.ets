@@ -5,7 +5,9 @@ import { I18n } from '../utils/I18n';
  */
 @CustomDialog
 export struct GroupDialog {
-  @Prop isDarkMode: boolean;
+  // 主题走 AppStorage（不是 @Prop）：弹窗内容由 CustomDialogController 构建，
+  // 父组件重渲染不会重建它，切主题时 @Prop 会停在旧值直到关掉重开。
+  @StorageProp('sheafReaderIsDarkMode') isDarkMode: boolean = false;
   @State groupName: string = '';
   @State errorMessage: string = '';
   existingNames: string[] = [];

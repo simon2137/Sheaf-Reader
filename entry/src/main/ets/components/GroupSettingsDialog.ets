@@ -42,7 +42,9 @@ export struct GroupSettingsDialog {
   members: Feed[] = [];
 
   @State name: string = '';
-  @State isDarkMode: boolean = false;
+  // 主题走 AppStorage（不是 @Prop/@State）：弹窗内容由 CustomDialogController 构建，
+  // 父组件重渲染不会重建它；原来声明成 @State 更收不到父组件的值，深色下一直是浅色。
+  @StorageProp('sheafReaderIsDarkMode') isDarkMode: boolean = false;
   @State errorMessage: string = '';
   @State confirmingDelete: boolean = false;
   @State isSaving: boolean = false;

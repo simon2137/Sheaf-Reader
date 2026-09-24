@@ -464,7 +464,6 @@ struct Index {
   private openAddFeed(): void {
     this.addFeedDialog = new CustomDialogController({
       builder: AddFeedDialog({
-        isDarkMode: this.store.isDarkMode,
         groups: this.store.groups,
         onConfirm: async (url: string, name: string, groupId: number): Promise<AddFeedResult> => {
           const result: AddFeedResult = await this.store.addFeed(url, name, groupId);
@@ -486,9 +485,7 @@ struct Index {
   private openSettings(): void {
     this.settingsDialog = new CustomDialogController({
       builder: SettingsDialog({
-        isDarkMode: this.store.isDarkMode,
-        darkMode: this.store.settings.darkMode,
-        locale: this.store.locale,
+        store: this.store,
         onClose: () => {
           this.settingsOpen = false;
         },
@@ -505,12 +502,6 @@ struct Index {
           }
           this.openSettings();
         },
-        fontSize: this.store.settings.fontSize,
-        showThumbnails: this.store.settings.showThumbnails,
-        openInBuiltInView: this.store.settings.openInBuiltInView,
-        fetchInterval: this.store.settings.fetchIntervalMinutes,
-        feedCount: this.store.feeds.length,
-        articleCount: this.store.articles.length,
         onDarkModeChange: (mode: number) => {
           this.store.setDarkMode(mode);
         },
@@ -527,7 +518,6 @@ struct Index {
           this.store.setFetchInterval(minutes);
           this.startRefreshTimer();
         },
-        searchEngine: this.store.settings.searchEngine,
         onSearchEngineChange: (engine: number) => {
           this.store.setSearchEngine(engine);
         },
@@ -639,7 +629,6 @@ struct Index {
   private confirmRestore(preview: BackupOutcome, content: string): void {
     this.confirmDialog = new CustomDialogController({
       builder: ConfirmDialog({
-        isDarkMode: this.store.isDarkMode,
         title: I18n.get('app.restore'),
         message: I18n.get('app.confirmImport') + '\n\n'
           + I18n.get('app.backupSummary',
@@ -694,7 +683,6 @@ struct Index {
 
     this.rulesDialog = new CustomDialogController({
       builder: RulesDialog({
-        isDarkMode: this.store.isDarkMode,
         feeds: this.store.feeds,
         initialFeedId: initial,
         onLoadRules: async (feedId: number): Promise<SourceRule[]> => {
@@ -723,7 +711,6 @@ struct Index {
   private openServiceSettings(): void {
     this.serviceDialog = new CustomDialogController({
       builder: ServiceSettingsDialog({
-        isDarkMode: this.store.isDarkMode,
         initialConfigs: this.store.serviceConfigs,
         feedCount: this.store.feeds.length,
         linkedCount: this.store.serviceLinkedCount,
@@ -774,7 +761,6 @@ struct Index {
     }
     this.groupDialog = new CustomDialogController({
       builder: GroupDialog({
-        isDarkMode: this.store.isDarkMode,
         existingNames: names,
         onCreate: async (name: string) => {
           await this.store.createGroup(name);
@@ -828,7 +814,6 @@ struct Index {
         initialTextDir: feed.textDir,
         initialHidden: feed.hidden,
         serviceManaged: feed.isServiceManaged(),
-        isDarkMode: this.store.isDarkMode,
         groupNames: this.groupNames(),
         initialGroupIndex: this.groupIndexOf(feed.groupId),
         onAssignGroup: async (index: number) => {
@@ -896,7 +881,6 @@ struct Index {
         existingNames: others,
         groupId: groupId,
         members: members,
-        isDarkMode: this.store.isDarkMode,
         onAssign: async (feedId: number, targetGroupId: number) => {
           await this.store.assignFeedGroup(feedId, targetGroupId);
         },

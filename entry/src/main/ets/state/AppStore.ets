@@ -272,6 +272,16 @@ export class AppStore {
 
   updateDarkMode(): void {
     this.isDarkMode = this.settings.darkMode === DarkModeSetting.DARK;
+    /*
+     * 同时发一份到 AppStorage。弹窗内容由 CustomDialogController 构建，父组件重渲染
+     * 不会重建它：主题用 @Prop 传进去时，弹窗打开期间切主题会停在旧配色，直到关掉重开
+     * （设备上实测过）。链到 AppStorage 才能让开着的弹窗自己重绘。
+     * 这里是唯一写入点，AppStore.init() 与 setDarkMode() 都会走到。
+     */
+    AppStorage.setOrCreate('sheafReaderIsDarkMode', this.isDarkMode);
+    // 同一个理由：设置页那个「应用主题」下拉的当前值也要跟着变，
+    // 否则弹窗会变深色、下拉里却还写着「浅色模式」。
+    AppStorage.setOrCreate('sheafReaderDarkModeSetting', this.settings.darkMode);
   }
 
   async setDarkMode(mode: number): Promise<void> {

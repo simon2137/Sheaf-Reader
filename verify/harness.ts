@@ -1947,7 +1947,7 @@ check('a stored value outside the original list stays selectable',
   && FetchSchedule.options(FetchSchedule.FREQUENCIES, 15).length === 8);
 check('both dropdowns render and index the same list',
   settingsPanel.indexOf('this.intervalValues()[index]') >= 0
-  && settingsPanel.indexOf('this.intervalValues().indexOf(this.fetchInterval)') >= 0);
+  && settingsPanel.indexOf('this.intervalValues().indexOf(this.store.settings.fetchIntervalMinutes)') >= 0);
 check('the source panel takes its options from FetchSchedule too',
   feedPanel.indexOf('FetchSchedule.options(FetchSchedule.FREQUENCIES, this.fetchFrequency)') >= 0
   && feedPanel.indexOf('this.frequencyValues()[index]') >= 0);
@@ -2264,8 +2264,8 @@ check('the font-size stepper reads and writes its own state, not a stale @Prop',
   && settingsPanel.indexOf('this.fontSizeShown = this.fontSizeShown - 1;') >= 0
   && settingsPanel.indexOf('onFontSizeChange(this.fontSize + 1)') < 0
   && settingsPanel.indexOf('onFontSizeChange(this.fontSize - 1)') < 0);
-check('the panel seeds that copy from the prop it was opened with',
-  settingsPanel.indexOf('this.fontSizeShown = this.fontSize;') >= 0);
+check('the panel seeds that copy from the live store setting',
+  settingsPanel.indexOf('this.fontSizeShown = this.store.settings.fontSize;') >= 0);
 // The reader's font *family* picker used to sit next to it, fed by the platform
 // enumeration plus a measured fallback list. It was removed on request: the
 // reader now always renders in the system font, and the setting, its setter, its
@@ -2459,6 +2459,44 @@ check('every Select carries the select theme', unthemedSelects.length === 0,
   unthemedSelects.join(', '));
 check('the Select theme covers value, menu and selected rows',
   thinSelectThemes.length === 0, thinSelectThemes.join(', '));
+
+// --- Dialog theming ------------------------------------------------------------
+// A dialog's tree is built by CustomDialogController, so the parent re-rendering does
+// not rebuild it: with the theme passed as @Prop (and three dialogs declaring it as
+// @State, which never received the parent's value at all), switching the theme while a
+// dialog was open left it on the old palette until it was closed and reopened.
+// The store publishes the theme to AppStorage instead and every dialog links it.
+const themeDialogFiles: string[] = ['AddFeedDialog.ets', 'ConfirmDialog.ets',
+  'FeedSettingsDialog.ets', 'GroupDialog.ets', 'GroupSettingsDialog.ets',
+  'RulesDialog.ets', 'ServiceSettingsDialog.ets', 'SettingsDialog.ets'];
+const staleThemeDialogs: string[] = [];
+for (const name of themeDialogFiles) {
+  const text: string = fs.readFileSync(etsRoot + '/components/' + name, 'utf8');
+  if (text.indexOf("@StorageProp('sheafReaderIsDarkMode')") < 0
+    || text.indexOf('@Prop isDarkMode') >= 0 || text.indexOf('@State isDarkMode') >= 0) {
+    staleThemeDialogs.push(name);
+  }
+}
+check('every dialog links the theme from AppStorage', staleThemeDialogs.length === 0,
+  staleThemeDialogs.join(', '));
+const themeStoreSrc: string = fs.readFileSync(etsRoot + '/state/AppStore.ets', 'utf8');
+check('the store publishes the theme for the dialogs',
+  themeStoreSrc.indexOf("AppStorage.setOrCreate('sheafReaderIsDarkMode'") >= 0);
+// The view components (cards, list, reader) stay on @Prop on purpose: they live in the
+// parent's build tree, so they do get rebuilt when the theme changes.
+check('the view components keep their @Prop theme',
+  fs.readFileSync(etsRoot + '/components/ArticleListView.ets', 'utf8')
+    .indexOf('@Prop isDarkMode: boolean;') >= 0);
+// The settings panel is the one dialog that *edits* settings, and its values have to
+// stay live while it is open: with @Prop snapshots, a rebuild (which the theme switch
+// triggers) re-read the values the panel was opened with. It links the store directly,
+// like the sidebar and the list do.
+const settingsPanelSrc: string = fs.readFileSync(etsRoot + '/components/SettingsDialog.ets', 'utf8');
+check('the settings panel reads its live settings from the store',
+  settingsPanelSrc.indexOf('@ObjectLink store: AppStore;') >= 0
+  && settingsPanelSrc.indexOf('this.store.settings.fetchIntervalMinutes') >= 0
+  && settingsPanelSrc.indexOf('@Prop fetchInterval') < 0
+  && settingsPanelSrc.indexOf('@Prop searchEngine') < 0);
 
 // --- The filter row's contents --------------------------------------------------
 // Three search modifiers used to be chips here and were removed on request: they

@@ -1,3 +1,4 @@
+import { AppStore } from '../state/AppStore';
 import { DarkModeSetting } from '../model/Models';
 import { I18n } from '../utils/I18n';
 import { SearchEngines } from '../utils/SearchEngines';
@@ -31,16 +32,17 @@ const DELETE_DAYS: number[] = [7, 14, 21, 28, 0];
  */
 @CustomDialog
 export struct SettingsDialog {
-  @Prop isDarkMode: boolean;
-  @Prop darkMode: number;
-  @Prop fontSize: number;
-  @Prop showThumbnails: boolean;
-  @Prop openInBuiltInView: boolean;
-  @Prop fetchInterval: number;
-  @Prop feedCount: number;
-  @Prop articleCount: number;
-  /** Engine used by "search selected text". */
-  @Prop searchEngine: number;
+  // 主题走 AppStorage（不是 @Prop）：弹窗内容由 CustomDialogController 构建，
+  // 父组件重渲染不会重建它，切主题时 @Prop 会停在旧值直到关掉重开。
+  @StorageProp('sheafReaderIsDarkMode') isDarkMode: boolean = false;
+  // 同理：这个下拉的当前值要立刻跟着变，不能停在打开弹窗时的快照。
+  @StorageProp('sheafReaderDarkModeSetting') darkMode: number = DarkModeSetting.SYSTEM;
+  /*
+   * 其余设置在弹窗里是**改完立刻要看到新值**的：用 @Prop 传快照时，弹窗只会在自己重建时
+   * 重新读到它们，而切主题正好会触发一次重建 —— 于是「先改抓取频率、再切主题」会把那一行
+   * 显示回旧值（实测）。链 store 就和侧栏/列表一样始终读实时状态。回调仍由页面传入。
+   */
+  @ObjectLink store: AppStore;
   onSearchEngineChange: (engine: number) => void = () => {
   };
 
@@ -114,7 +116,7 @@ export struct SettingsDialog {
   @State fontSizeShown: number = 16;
 
   aboutToAppear(): void {
-    this.fontSizeShown = this.fontSize;
+    this.fontSizeShown = this.store.settings.fontSize;
     this.measureArticles();
     this.measureCache();
   }
@@ -213,7 +215,7 @@ export struct SettingsDialog {
    * 15/30/60/120/240/720 list.
    */
   private intervalValues(): number[] {
-    return FetchSchedule.options(FetchSchedule.INTERVALS, this.fetchInterval);
+    return FetchSchedule.options(FetchSchedule.INTERVALS, this.store.settings.fetchIntervalMinutes);
   }
 
   private fetchIntervalOptions(): SelectOption[] {
@@ -225,7 +227,7 @@ export struct SettingsDialog {
   }
 
   private fetchIntervalIndex(): number {
-    const index: number = this.intervalValues().indexOf(this.fetchInterval);
+    const index: number = this.intervalValues().indexOf(this.store.settings.fetchIntervalMinutes);
     return index >= 0 ? index : 0;
   }
 
@@ -242,7 +244,7 @@ export struct SettingsDialog {
   }
 
   private fetchIntervalLabel(): string {
-    return this.intervalLabel(this.fetchInterval);
+    return this.intervalLabel(this.store.settings.fetchIntervalMinutes);
   }
 
   build() {
@@ -290,7 +292,7 @@ export struct SettingsDialog {
               .layoutWeight(1)
             Select(this.localeOptions())
               .selected(this.localeIndex())
-              .value(I18n.localeLabel(this.locale))
+              .value(I18n.localeLabel(this.store.locale))
               .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
@@ -381,7 +383,7 @@ export struct SettingsDialog {
               .fontSize(14)
               .fontColor(this.textColor())
               .layoutWeight(1)
-            Toggle({ type: ToggleType.Switch, isOn: this.showThumbnails })
+            Toggle({ type: ToggleType.Switch, isOn: this.store.settings.showThumbnails })
               .selectedColor('#0078D4')
               .onChange((isOn: boolean) => {
                 this.onShowThumbnailsChange(isOn);
@@ -405,7 +407,7 @@ export struct SettingsDialog {
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start)
 
-            Toggle({ type: ToggleType.Switch, isOn: this.openInBuiltInView })
+            Toggle({ type: ToggleType.Switch, isOn: this.store.settings.openInBuiltInView })
               .selectedColor('#0078D4')
               .onChange((isOn: boolean) => {
                 this.onOpenInBuiltInViewChange(isOn);
@@ -420,8 +422,8 @@ export struct SettingsDialog {
               .fontColor(this.textColor())
               .layoutWeight(1)
             Select(this.searchEngineOptions())
-              .selected(this.searchEngine)
-              .value(I18n.get(SearchEngines.labelKey(this.searchEngine)))
+              .selected(this.store.settings.searchEngine)
+              .value(I18n.get(SearchEngines.labelKey(this.store.settings.searchEngine)))
               .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
@@ -458,8 +460,8 @@ export struct SettingsDialog {
           .width('100%')
           .padding({ top: 10, bottom: 10 })
 
-          Text(I18n.get('app.subscriptionsCount', new Map<string, string | number>([['count', this.feedCount]]))
-            + '   |   ' + I18n.get('app.cachedArticles', new Map<string, string | number>([['count', this.articleCount]])))
+          Text(I18n.get('app.subscriptionsCount', new Map<string, string | number>([['count', this.store.feeds.length]]))
+            + '   |   ' + I18n.get('app.cachedArticles', new Map<string, string | number>([['count', this.store.articles.length]])))
             .fontSize(12)
             .fontColor(this.secondaryColor())
             .width('100%')
@@ -662,7 +664,7 @@ export struct SettingsDialog {
   }
 
   private localeIndex(): number {
-    const index: number = I18n.availableLocales().indexOf(this.locale);
+    const index: number = I18n.availableLocales().indexOf(this.store.locale);
     return index >= 0 ? index : 0;
   }
 }

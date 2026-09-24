@@ -42,7 +42,9 @@ const SERVICE_HELP_URL: string =
  */
 @CustomDialog
 export struct ServiceSettingsDialog {
-  @Prop isDarkMode: boolean;
+  // 主题走 AppStorage（不是 @Prop）：弹窗内容由 CustomDialogController 构建，
+  // 父组件重渲染不会重建它，切主题时 @Prop 会停在旧值直到关掉重开。
+  @StorageProp('sheafReaderIsDarkMode') isDarkMode: boolean = false;
   @Prop initialConfigs: ServiceConfigs;
   @Prop feedCount: number;
   @Prop linkedCount: number;
