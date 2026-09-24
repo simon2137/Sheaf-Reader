@@ -2,6 +2,21 @@ import { I18n } from '../utils/I18n';
 import { FetchSchedule } from '../utils/FetchSchedule';
 import { TouchTarget } from '../utils/TouchTarget';
 
+/*
+ * ArkUI 的 Select 不跟随应用配色：不显式设色时，值文本取浅色主题的默认黑，深色下就是黑字压深底。
+ * 值文本跟随主题；**展开的菜单固定成浅色菜单** —— 菜单容器与每个菜单项的描边由系统绘制且是浅色的，
+ * 深色菜单配上那些白描边很不协调，所以两种主题下都用浅色模式那一套。
+ */
+@Extend(Select)
+function themedSelect(textColor: string) {
+  .fontColor(textColor)
+  .optionFontColor('#323130')
+  .selectedOptionFontColor('#0078D4')
+  .menuBackgroundColor('#FFFFFF')
+  .optionBgColor('#FFFFFF')
+  .selectedOptionBgColor('#F3F2F1')
+}
+
 /**
  * Per-source settings, mirroring the original's source settings panel:
  * name, fetch frequency limit, default open target, text direction and
@@ -223,6 +238,7 @@ export struct FeedSettingsDialog {
       Select(this.frequencyOptions())
         .selected(this.frequencyIndex())
         .value(this.frequencyLabel(this.fetchFrequency))
+        .themedSelect(this.textColor())
         .width('100%')
         .onSelect((index: number) => {
           this.fetchFrequency = this.frequencyValues()[index];
@@ -238,6 +254,7 @@ export struct FeedSettingsDialog {
       Select(this.openTargetOptions())
         .selected(this.openTarget)
         .value(this.openTargetLabel(this.openTarget))
+        .themedSelect(this.textColor())
         .width('100%')
         .onSelect((index: number) => {
           this.openTarget = index;
@@ -253,6 +270,7 @@ export struct FeedSettingsDialog {
       Select(this.textDirOptions())
         .selected(this.textDir)
         .value(this.textDirLabel(this.textDir))
+        .themedSelect(this.textColor())
         .width('100%')
         .onSelect((index: number) => {
           this.textDir = index;
@@ -294,6 +312,7 @@ export struct FeedSettingsDialog {
           .value(this.groupIndex >= 0 && this.groupIndex < this.groupNames.length
             ? this.groupNames[this.groupIndex]
             : I18n.get('groups.chooseGroup'))
+          .themedSelect(this.textColor())
           .layoutWeight(1)
           .onSelect((index: number) => {
             this.groupIndex = index;

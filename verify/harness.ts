@@ -2426,6 +2426,40 @@ for (const file of etsFiles(etsRoot)) {
 check('no response region is sized for a decorative icon',
   smallRegions.length === 0, smallRegions.join(', '));
 
+// --- Select colours ------------------------------------------------------------
+// ArkUI's Select does not inherit the app's palette: without explicit colours its
+// value text falls back to the light theme's black, which is unreadable on a dark
+// dialog (reported on device: 深色模式下下拉菜单显示黑字). The value text follows the
+// theme; the *menu* is pinned to the light scheme on purpose — its container and every
+// item keep a light outline drawn by the system, so a dark menu inside those white
+// outlines looked wrong (also reported on device). Every Select therefore carries the
+// file-local `themedSelect` chain, and the chain itself is pinned here, since dropping
+// one attribute is exactly how this broke.
+const unthemedSelects: string[] = [];
+const thinSelectThemes: string[] = [];
+for (const file of etsFiles(etsRoot)) {
+  const text: string = fs.readFileSync(file, 'utf8');
+  const name: string = file.slice(file.lastIndexOf('/') + 1);
+  const selects = (text.match(/^[ \t]*Select\(/gm) ?? []).length;
+  if (selects === 0) {
+    continue;
+  }
+  const themed = (text.match(/\.themedSelect\(/g) ?? []).length;
+  if (text.indexOf('@Extend(Select)') < 0 || themed !== selects) {
+    unthemedSelects.push(name + ': ' + themed + '/' + selects);
+  }
+  for (const attr of ['.fontColor(', '.optionFontColor(', '.selectedOptionFontColor(',
+    '.menuBackgroundColor(', '.optionBgColor(', '.selectedOptionBgColor(']) {
+    if (text.indexOf(attr) < 0) {
+      thinSelectThemes.push(name + ' missing ' + attr);
+    }
+  }
+}
+check('every Select carries the select theme', unthemedSelects.length === 0,
+  unthemedSelects.join(', '));
+check('the Select theme covers value, menu and selected rows',
+  thinSelectThemes.length === 0, thinSelectThemes.join(', '));
+
 // --- The filter row's contents --------------------------------------------------
 // Three search modifiers used to be chips here and were removed on request: they
 // modify *search*, not the list, so the row keeps the two presets and

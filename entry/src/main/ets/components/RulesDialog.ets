@@ -4,6 +4,21 @@ import { RuleEngine } from '../services/RuleEngine';
 import { I18n } from '../utils/I18n';
 import { TouchTarget } from '../utils/TouchTarget';
 
+/*
+ * ArkUI 的 Select 不跟随应用配色：不显式设色时，值文本取浅色主题的默认黑，深色下就是黑字压深底。
+ * 值文本跟随主题；**展开的菜单固定成浅色菜单** —— 菜单容器与每个菜单项的描边由系统绘制且是浅色的，
+ * 深色菜单配上那些白描边很不协调，所以两种主题下都用浅色模式那一套。
+ */
+@Extend(Select)
+function themedSelect(textColor: string) {
+  .fontColor(textColor)
+  .optionFontColor('#323130')
+  .selectedOptionFontColor('#0078D4')
+  .menuBackgroundColor('#FFFFFF')
+  .optionBgColor('#FFFFFF')
+  .selectedOptionBgColor('#F3F2F1')
+}
+
 /**
  * Regex automation rules, ported from the original's Rules settings pane.
  *
@@ -401,6 +416,7 @@ export struct RulesDialog {
               .selected(this.feedIndex)
               .value(this.currentFeed() !== null
                 ? this.currentFeed()!.title : I18n.get('rules.selectSource'))
+              .themedSelect(this.textColor())
               .width('100%')
               .enabled(!this.editing)
               .onSelect((index: number) => {
@@ -543,6 +559,7 @@ export struct RulesDialog {
                   ])
                     .selected(this.draftScope)
                     .value(this.scopeLabel(this.draftScope))
+                    .themedSelect(this.textColor())
                     .layoutWeight(1)
                     .onSelect((index: number) => {
                       this.draftScope = index;
@@ -558,6 +575,7 @@ export struct RulesDialog {
                   ])
                     .selected(this.draftMatch ? 0 : 1)
                     .value(this.draftMatch ? I18n.get('rules.match') : I18n.get('rules.notMatch'))
+                    .themedSelect(this.textColor())
                     .layoutWeight(1)
                     .margin({ left: 28 })
                     .onSelect((index: number) => {

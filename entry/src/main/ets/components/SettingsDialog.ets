@@ -5,6 +5,21 @@ import { StorageSize } from '../utils/StorageSize';
 import { FetchSchedule } from '../utils/FetchSchedule';
 import { TouchTarget } from '../utils/TouchTarget';
 
+/*
+ * ArkUI 的 Select 不跟随应用配色：不显式设色时，值文本取浅色主题的默认黑，深色下就是黑字压深底。
+ * 值文本跟随主题；**展开的菜单固定成浅色菜单** —— 菜单容器与每个菜单项的描边由系统绘制且是浅色的，
+ * 深色菜单配上那些白描边很不协调，所以两种主题下都用浅色模式那一套。
+ */
+@Extend(Select)
+function themedSelect(textColor: string) {
+  .fontColor(textColor)
+  .optionFontColor('#323130')
+  .selectedOptionFontColor('#0078D4')
+  .menuBackgroundColor('#FFFFFF')
+  .optionBgColor('#FFFFFF')
+  .selectedOptionBgColor('#F3F2F1')
+}
+
 /**
  * "Delete articles from … days ago" choices, mirroring the original's list.
  * `0` is the original's own encoding of "Delete all articles".
@@ -276,6 +291,7 @@ export struct SettingsDialog {
             Select(this.localeOptions())
               .selected(this.localeIndex())
               .value(I18n.localeLabel(this.locale))
+              .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
                 this.onLocaleChange(I18n.availableLocales()[index]);
@@ -298,6 +314,7 @@ export struct SettingsDialog {
               .value(this.darkMode === DarkModeSetting.DARK ? I18n.get('app.darkTheme')
                 : (this.darkMode === DarkModeSetting.LIGHT
                   ? I18n.get('app.lightTheme') : I18n.get('followSystem')))
+              .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
                 this.onDarkModeChange(index);
@@ -405,6 +422,7 @@ export struct SettingsDialog {
             Select(this.searchEngineOptions())
               .selected(this.searchEngine)
               .value(I18n.get(SearchEngines.labelKey(this.searchEngine)))
+              .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
                 this.onSearchEngineChange(SearchEngines.ALL[index]);
@@ -431,6 +449,7 @@ export struct SettingsDialog {
             Select(this.fetchIntervalOptions())
               .selected(this.fetchIntervalIndex())
               .value(this.fetchIntervalLabel())
+              .themedSelect(this.textColor())
               .width(150)
               .onSelect((index: number) => {
                 this.onFetchIntervalChange(this.intervalValues()[index]);
@@ -526,6 +545,7 @@ export struct SettingsDialog {
             Select(this.deleteOptions())
               .selected(this.deleteIndex)
               .value(this.deleteLabel())
+              .themedSelect(this.textColor())
               .layoutWeight(1)
               .onSelect((index: number) => {
                 this.deleteIndex = index;

@@ -2,6 +2,21 @@ import { FeedGroup, AddFeedResult } from '../model/Models';
 import { I18n } from '../utils/I18n';
 import { TouchTarget } from '../utils/TouchTarget';
 
+/*
+ * ArkUI 的 Select 不跟随应用配色：不显式设色时，值文本取浅色主题的默认黑，深色下就是黑字压深底。
+ * 值文本跟随主题；**展开的菜单固定成浅色菜单** —— 菜单容器与每个菜单项的描边由系统绘制且是浅色的，
+ * 深色菜单配上那些白描边很不协调，所以两种主题下都用浅色模式那一套。
+ */
+@Extend(Select)
+function themedSelect(textColor: string) {
+  .fontColor(textColor)
+  .optionFontColor('#323130')
+  .selectedOptionFontColor('#0078D4')
+  .menuBackgroundColor('#FFFFFF')
+  .optionBgColor('#FFFFFF')
+  .selectedOptionBgColor('#F3F2F1')
+}
+
 /**
  * Modal dialog for subscribing to a new feed.
  */
@@ -136,6 +151,7 @@ export struct AddFeedDialog {
         .selected(this.selectedGroupIndex)
         .value(this.selectedGroupIndex === 0 ? I18n.get('app.noGroup')
           : this.groups[this.selectedGroupIndex - 1].name)
+        .themedSelect(this.textColor())
         .width('100%')
         .onSelect((index: number) => {
           this.selectedGroupIndex = index;
