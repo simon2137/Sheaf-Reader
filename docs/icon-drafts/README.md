@@ -1,31 +1,42 @@
-# Sheaf Reader 束阅 · 应用图标（6 版设计稿 + 已落地资源）
+# Sheaf Reader 束阅 · 应用图标（选定方案 + 已落地资源）
 
 > 状态：**已选定 02 麦束 / 纸束，并已落地到工程**——分层图标配置完成，见文末「已落地的资源」。
-> 总览图：[`overview.png`](overview.png) · 安全区说明：[`_guides.png`](_guides.png)
+> 总览图（六版同框）：[`overview.png`](overview.png) · 安全区说明：[`_guides.png`](_guides.png)
+>
+> 仓库只留**选定方案**的产物与上面两张图：未选中的 5 版设计稿（曾占约 1.7 MB）已移除，
+> 它们是生成器的输出，`python docs/icon-drafts/generate_icons.py` 一条命令即可原样重生成。
 
 ## 六版方案
 
 | # | 方案 | 视觉 | 立意 | 风险 |
 |---|---|---|---|---|
-| 01 | [RSS 弧线](01-rss-arcs/masked.png) | 白色信号弧 + 圆点，蓝底渐变 | 识别度最高的通用解，一眼知道是订阅/阅读器 | “太标准”，缺品牌个性 |
-| **02 ✅ 选定** | [麦束 / 纸束](02-sheaf-bundle/masked.png) | 三张纸扇形叠放、蓝色束带扎起，深色底 | 呼应品牌名 **Sheaf / 束**——“把信息扎成一束” | 深色底在浅色桌面上略重 |
-| 03 | [字标 S](03-monogram-s/masked.png) | 加粗 S + 深蓝投影，品牌蓝底 | 字标路线，小尺寸下轮廓最清晰 | 单字母与“订阅”语义无关 |
-| 04 | [文档 + 订阅弧](04-doc-feed/masked.png) | 折角文档 + 正文线 + RSS 弧，深蓝底 | 把“读文章”和“订源”两个核心动作放进一张图 | 元素多，极小尺寸会糊 |
-| 05 | [流线](05-fluent-flow/masked.png) | 一点发散的三条流线，青蓝渐变 | 抽象路线，同源 Fluent 设计语言 | 语义最弱，需配合应用名 |
-| 06 | [卡片流 + 未读点](06-card-list/masked.png) | 三层半透明卡片 + 琥珀色未读徽标 | 直译应用主界面（列表 + 未读） | 卡片堆叠在小尺寸下易粘连 |
+| 01 | RSS 弧线 | 白色信号弧 + 圆点，蓝底渐变 | 识别度最高的通用解，一眼知道是订阅/阅读器 | “太标准”，缺品牌个性 |
+| **02 ✅ 选定** | 麦束 / 纸束 | 三张纸扇形叠放、蓝色束带扎起，深色底 | 呼应品牌名 **Sheaf / 束**——“把信息扎成一束” | 深色底在浅色桌面上略重 |
+| 03 | 字标 S | 加粗 S + 深蓝投影，品牌蓝底 | 字标路线，小尺寸下轮廓最清晰 | 单字母与“订阅”语义无关 |
+| 04 | 文档 + 订阅弧 | 折角文档 + 正文线 + RSS 弧，深蓝底 | 把“读文章”和“订源”两个核心动作放进一张图 | 元素多，极小尺寸会糊 |
+| 05 | 流线 | 一点发散的三条流线，青蓝渐变 | 抽象路线，同源 Fluent 设计语言 | 语义最弱，需配合应用名 |
+| 06 | 卡片流 + 未读点 | 三层半透明卡片 + 琥珀色未读徽标 | 直译应用主界面（列表 + 未读） | 卡片堆叠在小尺寸下易粘连 |
+
+六版并排效果见 [`overview.png`](overview.png)；选定方案的单张效果图在 [`02-sheaf-bundle/`](02-sheaf-bundle)。
 
 配色取自工程内已有的 `entry/src/main/resources/base/element/color.json`：
 品牌蓝 `#0078D4` / `#106EBE`、深色底 `#1B1A19` 系、星标琥珀 `#FFB900`。
 
-## 每一版里有什么
+## 选定方案里有什么
+
+`02-sheaf-bundle/` 保留了生成器的全部产物：
 
 ```
-NN-<slug>/
-  background.png   1024×1024 不透明背景层（纯色/渐变/柔光，无主体元素）
-  foreground.png   1024×1024 透明背景前景层（只含图标主体，未做圆角与内边距）
-  preview.png      1024×1024 前景叠背景的方图效果
-  masked.png       1024×1024 套用系统超椭圆遮罩后的示意（仅预览用）
+02-sheaf-bundle/
+  background.png          1024×1024 不透明背景层（纯色/渐变/柔光，无主体元素）
+  foreground.png          1024×1024 透明背景前景层（只含图标主体，未做圆角与内边距）
+  preview.png             1024×1024 前景叠背景的方图效果
+  masked.png              1024×1024 套用系统超椭圆遮罩后的示意（仅预览用）
+  agc-216.png             216×216 AGC 上架用直角图
+  inapp-mark-preview.png  应用内标识（浅/深两套）的 22px 渲染预览
 ```
+
+未选中的 5 版只留在总览图里，不再单独占仓库空间；要单张效果图重跑一次生成器即可。
 
 ## 设计约束（按官方/上架要求执行）
 
@@ -105,15 +116,12 @@ python docs/icon-drafts/generate_icons.py     # 需要 Pillow + numpy（本机�
   API 17、`emulator 5.0.0.319(SP31DEVC00E319R1P5log)`，画面 2160×1440。
 - `hdc install -r` → `install bundle successfully`（模拟器接受未签名 HAP）。
 - **桌面图标渲染正确**：应用列表里出现 `束阅`，图标是新的纸束设计，系统超椭圆遮罩正常套用、主体无裁切 ——
-  见 [`emulator/app-list-sheaf-reader.jpeg`](emulator/app-list-sheaf-reader.jpeg)、放大图
-  [`emulator/launcher-icon-zoom.png`](emulator/launcher-icon-zoom.png)。
+  放大图 [`emulator/launcher-icon-zoom.jpg`](emulator/launcher-icon-zoom.jpg)。
 - **应用内品牌位已换过来**（报告过的两处 + 同源的加载页），浅色/深色都实测：
-  侧栏头部浅色 [`emulator/inapp-sidebar-light.png`](emulator/inapp-sidebar-light.png)、
-  深色 [`emulator/inapp-sidebar-dark.png`](emulator/inapp-sidebar-dark.png)；
-  设置 → 关于浅色 [`emulator/inapp-about-light.png`](emulator/inapp-about-light.png)、
-  深色 [`emulator/inapp-about-dark.png`](emulator/inapp-about-dark.png)；
-  整体运行截图 [`emulator/app-running-light.jpeg`](emulator/app-running-light.jpeg) /
-  [`emulator/app-running-dark.jpeg`](emulator/app-running-dark.jpeg)。
+  侧栏头部浅色 [`emulator/inapp-sidebar-light.jpg`](emulator/inapp-sidebar-light.jpg)、
+  深色 [`emulator/inapp-sidebar-dark.jpg`](emulator/inapp-sidebar-dark.jpg)；
+  设置 → 关于见 [`emulator/inapp-about-light.jpg`](emulator/inapp-about-light.jpg)
+  （关于页与侧栏取的是同一份资源，深色那套由侧栏一图代表）。
   深色是在 设置 → 应用主题 里切到「深色模式」实测的，验完已还原成「跟随系统」。
 - **应用照常运行**：窗口标题栏与任务栏都显示新图标，界面正常（侧栏 + 全部文章 + 空态）。
 - **加载页没截到**：本机没有任何订阅源，启动后瞬间进入空态（`LoadingScreen()` 只是一闪），
