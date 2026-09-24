@@ -1446,10 +1446,9 @@ struct Index {
   @Builder
   LoadingScreen() {
     Column() {
-      Image($r('app.media.ic_rss'))
+      Image(this.store.isDarkMode ? $r('app.media.app_mark_dark') : $r('app.media.app_mark_light'))
         .width(56)
         .height(56)
-        .fillColor('#0078D4')
       Text(I18n.get('app.name'))
         .fontSize(22)
         .fontWeight(FontWeight.Bold)

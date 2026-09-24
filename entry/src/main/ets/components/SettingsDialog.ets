@@ -580,7 +580,9 @@ export struct SettingsDialog {
             .margin({ bottom: 8 })
 
           Row() {
-            Image($r('app.media.ic_rss')).width(24).height(24).fillColor('#0078D4')
+            Image(this.isDarkMode ? $r('app.media.app_mark_dark') : $r('app.media.app_mark_light'))
+              .width(24)
+              .height(24)
             Column() {
               Text('Sheaf Reader 束阅')
                 .fontSize(14)

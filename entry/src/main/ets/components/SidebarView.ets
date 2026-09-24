@@ -429,10 +429,9 @@ export struct SidebarView {
     Column() {
       // Header
       Row() {
-        Image($r('app.media.ic_rss'))
+        Image(this.store.isDarkMode ? $r('app.media.app_mark_dark') : $r('app.media.app_mark_light'))
           .width(22)
           .height(22)
-          .fillColor('#0078D4')
         Text(I18n.get('app.name'))
           .fontSize(17)
           .fontWeight(FontWeight.Bold)
