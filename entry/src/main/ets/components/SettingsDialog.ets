@@ -611,7 +611,7 @@ export struct SettingsDialog {
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.textColor())
                 .width('100%')
-              Text(I18n.get('settings.version') + ' 1.0.1  ·  BSD-3-Clause')
+              Text(I18n.get('settings.version') + ' 1.0.2  ·  BSD-3-Clause')
                 .fontSize(11)
                 .fontColor(this.secondaryColor())
                 .width('100%')
