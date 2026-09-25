@@ -344,6 +344,16 @@ check('stripHtml unwraps double-escaped tags',
 check('decodeEntities is exposed for the reader view',
   FeedParser.decodeEntities('&lt;i&gt;x&lt;/i&gt;') === '<i>x</i>',
   FeedParser.decodeEntities('&lt;i&gt;x&lt;/i&gt;'));
+// Live feeds also use numeric references, which the named-entity table missed:
+// Solidot's channel title arrived as `奇客Solidot&#8211;传递最新科技情报` and stayed
+// that way in the sidebar (found while shooting the README screenshots).
+check('numeric character references are decoded',
+  FeedParser.decodeEntities('奇客Solidot&#8211;传递最新科技情报') === '奇客Solidot\u2013传递最新科技情报',
+  FeedParser.decodeEntities('奇客Solidot&#8211;传递最新科技情报'));
+check('hex references decode, out-of-range ones survive verbatim',
+  FeedParser.decodeEntities('A&#x2013;B') === 'A\u2013B'
+  && FeedParser.decodeEntities('&#8212;') === '\u2014'
+  && FeedParser.decodeEntities('&#x1F600;') === '&#x1F600;');
 
 section('FeedFilter (composable bit flags)');
 // The bit model is inverted: a clear bit REQUIRES that state. These assertions

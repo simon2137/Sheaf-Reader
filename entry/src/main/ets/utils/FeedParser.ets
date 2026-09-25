@@ -313,7 +313,44 @@ export class FeedParser {
     for (let i = 0; i < ENTITIES.length; i++) {
       out = out.split(ENTITIES[i]).join(ENTITY_VALUES[i]);
     }
+    out = FeedParser.decodeNumericEntities(out);
     return out.trim();
+  }
+
+  /**
+   * Numeric character references (`&#8211;`, `&#x2013;`). Real feeds lean on them:
+   * Solidot's channel title is `奇客Solidot&#8211;传递最新科技情报`, which reached the
+   * sidebar verbatim until this pass existed (found while shooting the README
+   * screenshots against live feeds — the mock data never used one).
+   */
+  private static decodeNumericEntities(text: string): string {
+    let out: string = '';
+    let i: number = 0;
+    while (i < text.length) {
+      const amp: number = text.indexOf('&#', i);
+      if (amp < 0) {
+        out = out.concat(text.substring(i));
+        break;
+      }
+      const semi: number = text.indexOf(';', amp + 2);
+      if (semi < 0 || semi - amp > 10) {
+        out = out.concat(text.substring(i, amp + 2));
+        i = amp + 2;
+        continue;
+      }
+      const body: string = text.substring(amp + 2, semi);
+      const isHex: boolean = body.length > 1 && (body.charAt(0) === 'x' || body.charAt(0) === 'X');
+      const code: number = isHex ? parseInt(body.substring(1), 16) : parseInt(body, 10);
+      out = out.concat(text.substring(i, amp));
+      if (!isNaN(code) && code > 0 && code <= 0xFFFF) {
+        out = out.concat(String.fromCharCode(code));
+      } else {
+        // Out of range or unparsable: keep the reference as it came in.
+        out = out.concat(text.substring(amp, semi + 1));
+      }
+      i = semi + 1;
+    }
+    return out;
   }
 
   /**
