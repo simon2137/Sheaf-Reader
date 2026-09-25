@@ -45,7 +45,7 @@
 | 设置 · 偏好 | 设置 · 数据与清理 | 同步服务 |
 |---|---|---|
 | <img src="docs/images/04-settings-general.jpeg" width="230"> | <img src="docs/images/05-settings-data.jpeg" width="230"> | <img src="docs/images/06-service-miniflux.jpeg" width="230"> |
-| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux（mock 端点示意） |
+| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux（mock 端点，`测试` 通过） |
 
 ## 功能
 
