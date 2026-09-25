@@ -39,7 +39,7 @@
 | 主界面 | 卡片视图 | 正则搜索 |
 |---|---|---|
 | <img src="docs/images/01-main.jpeg" width="230"> | <img src="docs/images/09-cards.jpeg" width="230"> | <img src="docs/images/08-search.jpeg" width="230"> |
-| 侧栏 + 列表 + 阅读器（三栏） | 卡片视图（未开阅读器时全宽多列） | 标题正则 `[软游]` 命中 9 篇 |
+| 侧栏 + 列表 + 阅读器（三栏） | 卡片视图 | 标题正则 `[软游]` 命中 9 篇 |
 
 | 文章菜单 | 视图菜单 | 规则引擎 |
 |---|---|---|
@@ -49,7 +49,7 @@
 | 设置 · 偏好 | 设置 · 数据与清理 | 同步服务 |
 |---|---|---|
 | <img src="docs/images/04-settings-general.jpeg" width="230"> | <img src="docs/images/05-settings-data.jpeg" width="230"> | <img src="docs/images/06-service-miniflux.jpeg" width="230"> |
-| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux（mock 端点，`测试` 通过） |
+| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux |
 
 ## 功能
 
