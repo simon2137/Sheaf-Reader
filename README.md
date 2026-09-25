@@ -21,19 +21,21 @@
 - **"移植"的含义**：功能语义、界面相对布局（结构 / 顺序 / 层级 / 操作位次）、数据模型与设置项语义**以上游为蓝本逐项对齐**；
   代码本身是用 ArkTS / ArkUI **重新实现**，不搬运上游 TypeScript 源码。
 - **验证方式**：任何"已完成"都以设备取证为准（`hdc` 的 `dumpLayout` / 截图 / mock 服务端日志），
-  另有 `verify/harness.ts` 的 **540 条**断言跑在**实际发布的源码**上。
+  另有 `verify/harness.ts` 的 **548 条**断言跑在**实际发布的源码**上。
 - **许可**：BSD-3-Clause，保留上游版权声明；派生范围、改名记录与第三方组件见 [NOTICE](NOTICE)。
   本项目为个人非官方移植，与上游作者、与华为均无隶属或背书关系。
 
 ## 截图
 
-> 由 `hdc` 在 HarmonyOS 模拟器（`Huawei_2in1`，窗口最大化）上实时抓取，界面语言简体中文。
-> 数据来自仓库自带的 mock 服务端（`verify/mock-miniflux.js`，3 个订阅源 / 300 篇合成文章），**不含真实账号数据**。
+> 由 `hdc` 在 HarmonyOS 模拟器（平板，API 13，2560×1600，应用全屏）上实时抓取，界面语言简体中文。
+> 均为**真实订阅源**：作者自建 Miniflux 实例上的 3 个源（`news - Sputnik News` / `小众软件` / `资讯 | 机核 GCORES`），
+> 文章、正文与封面图都是同步下来的真实内容；截图中不含端点、令牌等凭据。
+> 「同步服务」一张是本地 mock 端点的**参数示意**（`测试` 返回「连接成功」），不涉及真实账号。
 
-| 主界面（三栏） | 卡片视图 | 正则搜索 |
+| 主界面 | 卡片视图 | 正则搜索 |
 |---|---|---|
 | <img src="docs/images/01-main.jpeg" width="230"> | <img src="docs/images/09-cards.jpeg" width="230"> | <img src="docs/images/08-search.jpeg" width="230"> |
-| 侧栏 + 列表 + 阅读器 | 5 种布局之一 | 标题正则命中 10 篇 |
+| 订阅源 + 列表 + 阅读器 | 5 种布局之一 | 标题正则 `[软游]` 命中 9 篇 |
 
 | 文章菜单 | 视图菜单 | 规则引擎 |
 |---|---|---|
@@ -43,7 +45,7 @@
 | 设置 · 偏好 | 设置 · 数据与清理 | 同步服务 |
 |---|---|---|
 | <img src="docs/images/04-settings-general.jpeg" width="230"> | <img src="docs/images/05-settings-data.jpeg" width="230"> | <img src="docs/images/06-service-miniflux.jpeg" width="230"> |
-| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux（`测试` 返回连接成功） |
+| 语言 / 主题 / 字号 | 备份还原 / 清理 | Miniflux（mock 端点示意） |
 
 ## 功能
 
@@ -72,7 +74,7 @@ hvigorw --mode module -p product=default assembleHap --no-daemon
 ## 验证
 
 ```powershell
-pwsh -File verify/run.ps1      # 540 条断言，跑在实际发布的源码上
+pwsh -File verify/run.ps1      # 548 条断言，跑在实际发布的源码上
 ```
 
 脚本把 `entry/src/main/ets` 下的发布源码转成 TS，在 Node 下断言解析、筛选与规则、i18n、抓取排程、通知深链、
