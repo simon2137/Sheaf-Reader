@@ -78,6 +78,22 @@ export struct SettingsDialog {
   };
   onRestore: () => void = () => {
   };
+  /** The backup has been read and parsed; the panel asks for the go-ahead. */
+  onRestoreConfirm: () => void = () => {
+  };
+  onRestoreCancel: () => void = () => {
+  };
+  /**
+   * `feeds|articles` while a restore is waiting, empty otherwise.
+   *
+   * The confirmation lives in this panel rather than in a dialog on purpose:
+   * the system file picker hands the result back as its own window is torn
+   * down, and neither a `CustomDialogController` nor `promptAction.showDialog`
+   * opened at that moment ever appeared on the tablet emulator (both measured;
+   * the picker itself logged the URI and the app parsed the 188-byte backup).
+   * Re-opening this sheet and asking here sidesteps the ordering entirely.
+   */
+  @StorageProp('sheafReaderRestoreSummary') restoreSummary: string = '';
   onExportOpml: () => void = () => {
   };
   /** Serialized size of the article store, in bytes. */
@@ -223,6 +239,14 @@ export struct SettingsDialog {
 
   private dividerColor(): string {
     return this.isDarkMode ? '#3B3A39' : '#EDEBE9';
+  }
+
+  /** Field 0 is the feed count, field 1 the article count. */
+  private restoreCount(field: number): number {
+    const parts: string[] = this.restoreSummary.split('|');
+    const raw: string = field < parts.length ? parts[field] : '0';
+    const value: number = Number.parseInt(raw, 10);
+    return Number.isNaN(value) ? 0 : value;
   }
 
   private closeDialog(): void {
@@ -555,6 +579,52 @@ export struct SettingsDialog {
             .fontColor(this.secondaryColor())
             .width('100%')
             .margin({ top: 6 })
+
+          if (this.restoreSummary.length > 0) {
+            Column() {
+              Text(I18n.get('app.backupSummary',
+                new Map<string, string | number>([
+                  ['feeds', this.restoreCount(0)], ['articles', this.restoreCount(1)]
+                ])))
+                .fontSize(12)
+                .fontColor(this.textColor())
+                .width('100%')
+
+              Text(I18n.get('app.confirmImport'))
+                .fontSize(11)
+                .fontColor(this.secondaryColor())
+                .width('100%')
+                .margin({ top: 4 })
+
+              Row() {
+                Button(I18n.get('cancel'))
+                  .fontSize(13)
+                  .fontColor(this.textColor())
+                  .backgroundColor(this.dividerColor())
+                  .layoutWeight(1)
+                  .onClick(() => {
+                    this.onRestoreCancel();
+                  })
+
+                Button(I18n.get('app.restore'))
+                  .fontSize(13)
+                  .fontColor('#FFFFFF')
+                  .backgroundColor('#C42B1C')
+                  .layoutWeight(1)
+                  .margin({ left: 10 })
+                  .onClick(() => {
+                    this.onRestoreConfirm();
+                  })
+              }
+              .width('100%')
+              .margin({ top: 8 })
+            }
+            .width('100%')
+            .padding(10)
+            .backgroundColor(this.dividerColor())
+            .borderRadius(6)
+            .margin({ top: 10 })
+          }
 
           Divider().color(this.dividerColor()).strokeWidth(1).margin({ top: 12, bottom: 6 })
 

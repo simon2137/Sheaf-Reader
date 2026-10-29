@@ -97,7 +97,7 @@ $ia = $ia -replace "import \{ image \} from '@kit\.ImageKit';", "const image: an
 $ia = $ia -replace "import \{ pasteboard \} from '@kit\.BasicServicesKit';", "const pasteboard: any = {};"
 $ia = $ia -replace "import \{ common \} from '@kit\.AbilityKit';", "type common = any;"
 $ia = $ia -replace "import \{ HttpClient \} from '\.\./data/HttpClient';", "const HttpClient: any = {};"
-$ia = $ia -replace "import \{ OpmlFileService \} from './OpmlFileService';", "const OpmlFileService: any = {};"
+$ia = $ia -replace "import \{[^}]*\} from '\.{1,2}/OpmlFileService';", "const OpmlFileService: any = {};`nconst FileReadResult: any = {};`nconst FileWriteResult: any = {};"
 [System.IO.File]::WriteAllText("$here\src\utils\ImageActionsStub.ts", "// @ts-nocheck`n" + $ia, (New-Object System.Text.UTF8Encoding($false)))
 
 # Rule engine and its filter model are pure logic with no HarmonyOS kit

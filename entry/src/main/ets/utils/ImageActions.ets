@@ -2,7 +2,7 @@ import { image } from '@kit.ImageKit';
 import { pasteboard } from '@kit.BasicServicesKit';
 import { common } from '@kit.AbilityKit';
 import { HttpClient } from '../data/HttpClient';
-import { OpmlFileService } from './OpmlFileService';
+import { OpmlFileService, FileWriteResult } from './OpmlFileService';
 
 /**
  * The article image actions from the original's context menu:
@@ -73,9 +73,12 @@ export class ImageActions {
     if (bytes === null) {
       return 'app.imageFetchFailed';
     }
-    const uri: string | null = await OpmlFileService.pickAndWriteBytes(
+    const result: FileWriteResult = await OpmlFileService.pickAndWriteBytes(
       context, bytes, ImageActions.suggestedFileName(url));
-    return uri === null ? 'app.saveCancelled' : '';
+    if (result.cancelled) {
+      return 'app.saveCancelled';
+    }
+    return result.failed ? 'app.fileFailed' : '';
   }
 
   /** "Copy image": download and decode, then put the pixels on the clipboard. */

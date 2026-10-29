@@ -2678,6 +2678,70 @@ check('every password field is masked',
   (serviceSrc.match(/placeholder: I18n\.get\('service\.password'\)/g) || []).length
   === (serviceSrc.match(/placeholder: I18n\.get\('service\.password'\)[\s\S]{0,120}?\.type\(InputType\.Password\)/g) || []).length);
 
+// ---------------------------------------------------- file picker outcomes
+//
+// 导入 / 还原 returned bare `null` for both "user pressed 关闭" and "the picker
+// handed back a URI we could not open", so a hard failure looked exactly like a
+// cancel — the user's report was 还原和导入功能都没有用. The service now answers
+// with a result object, the page reports failures, and a failure must never fall
+// through to the silent path again.
+
+section('file picker distinguishes cancel from failure');
+
+const fileServiceSrc: string = fs.readFileSync(etsRoot + '/utils/OpmlFileService.ets', 'utf8');
+check('the read result carries separate cancelled/failed flags',
+  /class FileReadResult[\s\S]{0,600}cancelled: boolean[\s\S]{0,200}failed: boolean/.test(fileServiceSrc));
+check('the write result carries separate cancelled/failed flags',
+  /class FileWriteResult[\s\S]{0,600}cancelled: boolean[\s\S]{0,200}failed: boolean/.test(fileServiceSrc));
+check('an empty picker answer is reported as a cancel, not a failure',
+  (fileServiceSrc.match(/uris\.length === 0[\s\S]{0,80}return FileReadResult\.cancel\(\)/g) || []).length >= 1
+  && (fileServiceSrc.match(/uris\.length === 0[\s\S]{0,80}return FileWriteResult\.cancel\(\)/g) || []).length >= 2);
+check('a throwing picker or file system is reported as a failure',
+  (fileServiceSrc.match(/FileReadResult\.fail\(/g) || []).length >= 2
+  && (fileServiceSrc.match(/FileWriteResult\.fail\(/g) || []).length >= 3);
+check('the document picker result is no longer a bare string or null',
+  fileServiceSrc.indexOf('Promise<string | null>') < 0
+  && fileServiceSrc.indexOf('Promise<FileReadResult>') >= 0
+  && fileServiceSrc.indexOf('Promise<FileWriteResult>') >= 0);
+
+check('the page reports a failed read instead of returning silently',
+  /result\.failed[\s\S]{0,120}this\.reportFileFailure\(result\.detail\)/.test(indexSource)
+  && (indexSource.match(/this\.reportFileFailure\(result\.detail\)/g) || []).length >= 4);
+check('the page still keeps cancelling silent',
+  (indexSource.match(/if \(result\.cancelled\) \{\n      return;\n    \}/g) || []).length >= 4);
+check('a failure toast exists in both locales',
+  fs.readFileSync(etsRoot + '/utils/I18n.ets', 'utf8')
+    .match(/'app\.fileFailed'/g)?.length === 2);
+check('the file failure is logged with its detail',
+  indexSource.indexOf("console.error('FileService failed: ' + detail)") >= 0);
+
+// Opening a system picker on top of a live modal dialog leaves two modal windows
+// stacked; 备份 / 还原 already dismissed the sheet first, 导入 / 导出 did not.
+for (const entryPoint of ['importOpml', 'exportOpml']) {
+  const body: string = indexSource.slice(indexSource.indexOf('private async ' + entryPoint + '('));
+  check(entryPoint + ' dismisses the settings sheet before opening the picker',
+    body.slice(0, body.indexOf('OpmlFileService.')).indexOf('this.closeSettings();') >= 0,
+    entryPoint);
+}
+
+// Restore is destructive, so the summary must be shown before it runs. The
+// confirmation used to be a CustomDialog opened the instant the picker returned,
+// and nothing appeared at all — the picker's window is still tearing down and
+// both a CustomDialogController and promptAction.showDialog were dropped on the
+// tablet emulator. The panel now owns the confirmation.
+check('restore asks for confirmation inside the settings panel',
+  settingsPanel.indexOf("@StorageProp('sheafReaderRestoreSummary')") >= 0
+  && settingsPanel.indexOf('this.onRestoreConfirm()') >= 0
+  && settingsPanel.indexOf('this.onRestoreCancel()') >= 0);
+check('the page arms that confirmation after reading a backup',
+  indexSource.indexOf("AppStorage.setOrCreate('sheafReaderRestoreSummary'") >= 0
+  && indexSource.indexOf('this.pendingRestore = result.text;') >= 0);
+check('the page clears the confirmation once it is answered',
+  (indexSource.match(/AppStorage\.setOrCreate\('sheafReaderRestoreSummary', ''\)/g) || []).length >= 2);
+check('restore no longer opens a dialog straight after the picker',
+  indexSource.indexOf('this.confirmRestore(') < 0
+  && indexSource.indexOf('getPromptAction().showDialog') < 0);
+
 console.log('\n========================================');
 console.log('  passed: ' + passed + '   failed: ' + failed);
 console.log('========================================');

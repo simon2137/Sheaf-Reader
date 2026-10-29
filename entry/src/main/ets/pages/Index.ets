@@ -1,4 +1,4 @@
-import { window } from '@kit.ArkUI';
+import { promptAction, window } from '@kit.ArkUI';
 import { KeyCode } from '@kit.InputKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { common } from '@kit.AbilityKit';
@@ -18,7 +18,7 @@ import { RulesDialog } from '../components/RulesDialog';
 import { DocumentDialog } from '../components/DocumentDialog';
 import { LogMenuView } from '../components/LogMenuView';
 import { BundledText } from '../utils/BundledText';
-import { OpmlFileService } from '../utils/OpmlFileService';
+import { OpmlFileService, FileReadResult, FileWriteResult } from '../utils/OpmlFileService';
 import { ImageActions } from '../utils/ImageActions';
 import { BrowserLauncher } from '../utils/BrowserLauncher';
 import { CacheService } from '../utils/CacheService';
@@ -71,6 +71,8 @@ struct Index {
   private addFeedDialog: CustomDialogController | null = null;
   private settingsDialog: CustomDialogController | null = null;
   private confirmDialog: CustomDialogController | null = null;
+  /** Backup content waiting for the confirmation shown inside the settings panel. */
+  private pendingRestore: string = '';
   private groupDialog: CustomDialogController | null = null;
   private serviceDialog: CustomDialogController | null = null;
   private rulesDialog: CustomDialogController | null = null;
@@ -537,6 +539,12 @@ struct Index {
         onRestore: async () => {
           await this.pickBackup();
         },
+        onRestoreConfirm: async () => {
+          await this.applyRestore();
+        },
+        onRestoreCancel: () => {
+          this.cancelRestore();
+        },
         onMeasureArticles: async () => {
           return await this.store.articleStorageBytes();
         },
@@ -572,13 +580,32 @@ struct Index {
 
   // ------------------------------------------------------------ OPML support
 
+  /**
+   * Report a picker/file-system failure instead of returning silently.
+   *
+   * 导入 / 还原 used to look broken because a failure and a cancel both ended in
+   * `return null`: the picker can hand back a URI the app is not allowed to
+   * open, or a destination it cannot create, and swallowing that turned a hard
+   * error into "nothing happened" (measured on the 2in1 emulator — the picker
+   * logged `savedFileUris:1` while `AppFileService … realpath failed with 2`).
+   */
+  private reportFileFailure(detail: string): void {
+    console.error('FileService failed: ' + detail);
+    this.showToast(I18n.get('app.fileFailed'));
+  }
+
   private async importOpml(): Promise<void> {
-    const content: string | null = await OpmlFileService.pickAndRead(this.hostContext());
-    if (content === null) {
+    this.closeSettings();
+    const result: FileReadResult = await OpmlFileService.pickAndRead(this.hostContext());
+    if (result.cancelled) {
+      return;
+    }
+    if (result.failed) {
+      this.reportFileFailure(result.detail);
       return;
     }
     this.showToast(I18n.get('app.importingFeeds'));
-    const summary: ImportSummary = await this.store.importOpml(content);
+    const summary: ImportSummary = await this.store.importOpml(result.text);
     this.showToast(I18n.get('app.importedFeeds',
       new Map<string, string | number>([
         ['feeds', summary.success], ['failed', summary.failed]
@@ -590,12 +617,18 @@ struct Index {
       this.showToast(I18n.get('app.nothingToExport'));
       return;
     }
+    this.closeSettings();
     const opml: string = await this.store.exportOpml();
-    const uri: string | null = await OpmlFileService.pickAndWrite(this.hostContext(), opml);
-    if (uri !== null) {
-      this.showToast(I18n.get('app.exportedFeeds',
-        new Map<string, string | number>([['count', this.store.feeds.length]])));
+    const result: FileWriteResult = await OpmlFileService.pickAndWrite(this.hostContext(), opml);
+    if (result.cancelled) {
+      return;
     }
+    if (result.failed) {
+      this.reportFileFailure(result.detail);
+      return;
+    }
+    this.showToast(I18n.get('app.exportedFeeds',
+      new Map<string, string | number>([['count', this.store.feeds.length]])));
   }
 
   // ------------------------------------------------- backup / restore
@@ -607,64 +640,80 @@ struct Index {
   private async exportBackup(): Promise<void> {
     this.closeSettings();
     const content: string = await this.store.exportBackup();
-    const uri: string | null = await OpmlFileService.pickAndWriteAny(
+    const result: FileWriteResult = await OpmlFileService.pickAndWriteAny(
       this.hostContext(), content, 'Sheaf_Reader_Backup.frdata');
-    if (uri !== null) {
-      this.showToast(I18n.get('app.backupSaved'));
+    if (result.cancelled) {
+      return;
     }
+    if (result.failed) {
+      this.reportFileFailure(result.detail);
+      return;
+    }
+    this.showToast(I18n.get('app.backupSaved'));
   }
 
   /**
-   * Choose a backup and, after showing what it contains, restore it. Restore
-   * is destructive, so it always goes through a confirmation.
+   * Read a backup and hand the summary to the settings panel for confirmation.
+   *
+   * The confirmation is not a dialog: the picker returns while its own window is
+   * still being torn down, and a dialog opened in that moment never rendered on
+   * the tablet emulator — the picker logged the URI and the app parsed the
+   * 188-byte backup, but nothing appeared (measured with both a
+   * `CustomDialogController` and `promptAction.showDialog`). Re-opening the sheet
+   * and asking there is deterministic.
    */
   private async pickBackup(): Promise<void> {
     this.closeSettings();
-    const content: string | null = await OpmlFileService.pickAndReadAny(
+    const result: FileReadResult = await OpmlFileService.pickAndReadAny(
       this.hostContext(), ['.frdata', '.json']);
-    if (content === null) {
+    if (result.cancelled) {
       return;
     }
-    const preview: BackupOutcome | null = this.store.describeBackup(content);
+    if (result.failed) {
+      this.reportFileFailure(result.detail);
+      return;
+    }
+    const preview: BackupOutcome | null = this.store.describeBackup(result.text);
     if (preview === null) {
       this.showToast(I18n.get('app.backupInvalid'));
       return;
     }
-    this.confirmRestore(preview, content);
+    this.pendingRestore = result.text;
+    AppStorage.setOrCreate('sheafReaderRestoreSummary',
+      preview.feeds + '|' + preview.articles);
+    // Anything modal opened while the picker's window is going away is dropped
+    // (see the note above), so the confirmation lives inside the settings sheet
+    // and the sheet is re-opened for it. If even that is swallowed, the strip is
+    // still armed and shows up the next time the panel is opened.
+    this.openSettings();
   }
 
-  private confirmRestore(preview: BackupOutcome, content: string): void {
-    this.confirmDialog = new CustomDialogController({
-      builder: ConfirmDialog({
-        title: I18n.get('app.restore'),
-        message: I18n.get('app.confirmImport') + '\n\n'
-          + I18n.get('app.backupSummary',
-            new Map<string, string | number>([
-              ['feeds', preview.feeds], ['articles', preview.articles]
-            ])),
-        confirmLabel: I18n.get('app.restore'),
-        destructive: true,
-        onConfirm: async () => {
-          const outcome: BackupOutcome = await this.store.restoreBackup(content);
-          if (outcome.ok) {
-            // The backup carries the language setting, so re-apply it.
-            await I18n.init(this.hostContext(), this.store.locale);
-            this.showToast(I18n.get('app.backupRestored',
-              new Map<string, string | number>([
-                ['feeds', outcome.feeds], ['articles', outcome.articles]
-              ])));
-          } else {
-            this.showToast(I18n.get('app.backupInvalid'));
-          }
-        }
-      }),
-      autoCancel: true,
-      alignment: DialogAlignment.Center,
-      customStyle: true
-    });
-    this.confirmDialog.open();
+  /** The user confirmed the restore shown in the settings panel. */
+  private async applyRestore(): Promise<void> {
+    const content: string = this.pendingRestore;
+    this.pendingRestore = '';
+    AppStorage.setOrCreate('sheafReaderRestoreSummary', '');
+    if (content.length === 0) {
+      return;
+    }
+    this.closeSettings();
+    const outcome: BackupOutcome = await this.store.restoreBackup(content);
+    if (outcome.ok) {
+      // The backup carries the language setting, so re-apply it.
+      await I18n.init(this.hostContext(), this.store.locale);
+      this.showToast(I18n.get('app.backupRestored',
+        new Map<string, string | number>([
+          ['feeds', outcome.feeds], ['articles', outcome.articles]
+        ])));
+    } else {
+      this.showToast(I18n.get('app.backupInvalid'));
+    }
   }
 
+  private cancelRestore(): void {
+    this.pendingRestore = '';
+    AppStorage.setOrCreate('sheafReaderRestoreSummary', '');
+  }
   private closeSettings(): void {
     if (this.settingsDialog !== null) {
       this.settingsDialog.close();
