@@ -2757,6 +2757,17 @@ check('a rejected restore is reported instead of vanishing',
   indexSource.indexOf("console.error('restore failed: ' + error.message)") >= 0
   && indexSource.indexOf("I18n.get('app.restoreFailed'") >= 0);
 
+section('a backup carries the sync-service configuration');
+check('the backup shape has a service field',
+  backupSource.indexOf('service: string = ' + "''" + ';') >= 0
+  && backupSource.indexOf('service: string;') >= 0);
+check('exportAll stores the live service configuration',
+  backupSource.indexOf('backup.service = ServiceConfigs.toJson(await SyncManager.loadConfigs())') >= 0);
+check('importAll writes it back after the settings',
+  backupSource.indexOf('await SyncManager.saveConfigs(ServiceConfigs.fromJson(parsed.service))') >= 0);
+check('a restore rebuilds the page instead of waiting for a relaunch',
+  indexSource.indexOf("router.replaceUrl({ url: 'pages/Index' })") >= 0
+  && indexSource.indexOf('await this.reloadPage();') >= 0);
 section('the settings panel does not scan the article store');
 check('the article size is summed in SQL',
   dbSource.indexOf(') AS total FROM articles') >= 0);

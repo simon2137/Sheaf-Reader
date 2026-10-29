@@ -1,4 +1,5 @@
-import { Feed, Article, FeedGroup } from '../model/Models';
+import { Feed, Article, FeedGroup, ServiceConfigs } from '../model/Models';
+import { SyncManager } from './SyncManager';
 import { DatabaseManager } from '../data/DatabaseManager';
 
 /**
@@ -20,6 +21,13 @@ export class BackupFile {
   groups: FeedGroup[] = [];
   feeds: Feed[] = [];
   articles: Article[] = [];
+  /**
+   * The sync-service configuration as JSON, so a restore brings the endpoint
+   * and credentials back too. Kept beside settings rather than inside it: the
+   * service panel reads its own row, and a backup taken on one device has to
+   * carry the connection the other device should use.
+   */
+  service: string = '';
 }
 
 /**
@@ -35,6 +43,7 @@ export interface BackupPayload {
   groups: FeedGroup[];
   feeds: Feed[];
   articles: Article[];
+  service: string;
 }
 
 /** What a backup or restore did, for reporting back to the user. */
@@ -63,6 +72,7 @@ export class BackupService {
     const backup: BackupFile = new BackupFile();
     backup.exportedAt = Date.now();
     backup.settings = await BackupService.db.getAllSettings();
+    backup.service = ServiceConfigs.toJson(await SyncManager.loadConfigs());
     backup.groups = await BackupService.db.getAllGroups();
     backup.feeds = await BackupService.db.getAllFeeds();
     backup.articles = await BackupService.db.getAllArticles();
@@ -112,6 +122,9 @@ export class BackupService {
       parsed.version = raw.version;
       parsed.exportedAt = raw.exportedAt;
       parsed.settings = BackupService.toSettings(raw.settings);
+      if (raw.service !== undefined && raw.service !== null) {
+        parsed.service = raw.service;
+      }
       if (raw.groups !== undefined && raw.groups !== null) {
         parsed.groups = raw.groups;
       }
@@ -228,6 +241,12 @@ export class BackupService {
     // 5. Settings last, so the restored preferences apply to a consistent
     //    library.
     await BackupService.db.setSettings(parsed.settings);
+
+    // 6. The sync-service configuration. Older backups do not carry it, in
+    //    which case whatever the settings row held above stays in place.
+    if (parsed.service.length > 0) {
+      await SyncManager.saveConfigs(ServiceConfigs.fromJson(parsed.service));
+    }
 
     outcome.ok = true;
     outcome.message = 'backup_restored';

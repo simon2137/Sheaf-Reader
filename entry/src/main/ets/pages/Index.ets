@@ -1,4 +1,4 @@
-import { promptAction, window } from '@kit.ArkUI';
+import { promptAction, router, window } from '@kit.ArkUI';
 import { KeyCode } from '@kit.InputKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { common } from '@kit.AbilityKit';
@@ -689,6 +689,16 @@ struct Index {
     this.openSettings();
   }
 
+  /** Rebuild the entry page so a destructive change is reflected at once. */
+  private async reloadPage(): Promise<void> {
+    try {
+      await router.replaceUrl({ url: 'pages/Index' });
+    } catch (err) {
+      const error: Error = err as Error;
+      console.error('reloadPage failed: ' + error.message);
+    }
+  }
+
   /** The user confirmed the restore shown in the settings panel. */
   private async applyRestore(): Promise<void> {
     // Kept in AppStorage as well: the panel that shows the confirmation can
@@ -720,6 +730,11 @@ struct Index {
           new Map<string, string | number>([
             ['feeds', outcome.feeds], ['articles', outcome.articles]
           ])));
+        // The store reloads the data, but the panes keep rendering the old
+        // library until the page is rebuilt: reloading the entry page is the
+        // fastest honest reset (reported as 'restore only shows up after a
+        // relaunch').
+        await this.reloadPage();
         return;
       }
       console.error('restore: backup rejected by the store: ' + outcome.message);
