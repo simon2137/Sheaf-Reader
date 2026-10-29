@@ -2351,12 +2351,14 @@ check('every settings setter publishes the change to the store',
 // showed the header's title Column squeezed to zero width (no title in the dump at
 // all): the icon group alone needs ≈296vp. Both rows wrap now, and the header
 // stacks below 420vp.
-const wrapCount: number = (listSrc.match(/Flex\(\{ wrap: FlexWrap\.Wrap \}\)/g) ?? []).length;
-check('both chip rows wrap instead of overflowing the pane',
-  wrapCount === 2, 'wrap floors: ' + wrapCount);
-check('the filter chips sit in the wrapping container, not a bare Row',
-  /Flex\(\{ wrap: FlexWrap\.Wrap \}\) \{\s*ChipView\(\{/.test(listSrc)
-  && listSrc.indexOf('Filter toggles. Independent bits on top of the sidebar') >= 0);
+const scrollRows: number = (listSrc.match(/\.scrollable\(ScrollDirection\.Horizontal\)/g) ?? []).length;
+check('both chip rows scroll sideways instead of wrapping',
+  scrollRows === 2, 'horizontal rows: ' + scrollRows);
+check('neither chip row wraps any more',
+  listSrc.indexOf('Flex({ wrap: FlexWrap.Wrap })') < 0);
+check('the filter chips sit in a scrolling Row, not a wrapping Flex',
+  /Scroll\(\) \{\s*Row\(\) \{\s*ChipView\(\{/.test(listSrc)
+  && listSrc.indexOf('One line that scrolls sideways') >= 0);
 check('the list header stacks when the pane cannot hold title and icons',
   listSrc.indexOf('private headerStacks(): boolean {') >= 0
   && listSrc.indexOf('return this.paneWidth < 420;') >= 0
@@ -2365,8 +2367,8 @@ check('the list header stacks when the pane cannot hold title and icons',
 check('the title and the icon group stay reachable in both header layouts',
   (listSrc.match(/this\.HeaderTitle\(\)/g) ?? []).length === 2
   && (listSrc.match(/this\.HeaderButtons\(\)/g) ?? []).length === 2);
-check('wrapped chips get vertical spacing between the lines',
-  listSrc.indexOf('.margin({ right: this.gap, bottom: 6 })') >= 0);
+check('the chip rows hide their scrollbar so the row still reads as a filter bar',
+  (listSrc.match(/\.scrollBar\(BarState\.Off\)/g) ?? []).length >= 2);
 
 // --- Touch targets --------------------------------------------------------------
 // The UX guidance requires a tap area of at least 40vp x 40vp. Measured on the

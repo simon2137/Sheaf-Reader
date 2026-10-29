@@ -704,80 +704,94 @@ export struct ArticleListView {
        * offers the first two; the author scope was dropped from the list filter
        * altogether and now exists only for rules (`RuleSearchScope.Creator`).
        *
-       * A wrapping `Flex`, not a `Row`: the labels need more width than the pane
-       * (`LIST_MIN`..`LIST_MAX`, 300–420vp) can give once it is narrow, and as a
-       * `Row` they ran straight past the pane's right edge and drew on top of the
-       * reader (measured: row `[356,317][761,353]` with the last chip ending at
-       * x=916). Wrapping keeps every chip inside the pane; a single line looks
-       * exactly as before.
+       * One line that scrolls sideways — not a bare `Row`, not a wrapping `Flex`.
+       * A `Row` ran past the pane's right edge and drew on top of the reader
+       * (measured: row `[356,317][761,353]`, last chip ending at x=916). The
+       * wrapping `Flex` that replaced it kept the chips inside but broke the
+       * English labels onto a second row: the three need ≈350vp and the pane
+       * has 346vp at that width (4vp short — visible as 卡片视图 wrapping under
+       * 列表视图 on device). Scrolling keeps the row one line high in every
+       * language and still clips within the pane.
        */
-      Flex({ wrap: FlexWrap.Wrap }) {
-        ChipView({
-          label: I18n.get('context.unreadOnly'),
-          active: this.isUnreadOnly(),
-          isDarkMode: this.store.isDarkMode,
-          gap: 0,
-          onTap: () => {
-            this.store.switchFilter(this.isUnreadOnly()
-              ? FilterType.Default : FilterType.UnreadOnly);
-          }
-        })
-        ChipView({
-          label: I18n.get('context.starredOnly'),
-          active: this.isStarredOnly(),
-          isDarkMode: this.store.isDarkMode,
-          gap: 0,
-          onTap: () => {
-            this.store.switchFilter(this.isStarredOnly()
-              ? FilterType.Default : FilterType.StarredOnly);
-          }
-        })
-        ChipView({
-          label: I18n.get('context.showHidden'),
-          active: this.store.filterHas(FilterType.ShowHidden),
-          isDarkMode: this.store.isDarkMode,
-          gap: 0,
-          onTap: () => {
-            this.store.toggleFilter(FilterType.ShowHidden);
-          }
-        })
-      }
-      .width('100%')
-      .padding({ left: 12, right: 12, bottom: 8 })
-
-      // Per-view display options. Wraps for the same reason the filter row does.
-      if (this.store.viewOptionsOpen) {
-        Flex({ wrap: FlexWrap.Wrap }) {
+      Scroll() {
+        Row() {
           ChipView({
-            label: I18n.get('context.showCover'),
-            active: this.showCover(),
+            label: I18n.get('context.unreadOnly'),
+            active: this.isUnreadOnly(),
             isDarkMode: this.store.isDarkMode,
-            gap: 6,
+            gap: 0,
             onTap: () => {
-              this.store.toggleViewConfig(ViewConfigs.ShowCover);
+              this.store.switchFilter(this.isUnreadOnly()
+                ? FilterType.Default : FilterType.UnreadOnly);
             }
           })
           ChipView({
-            label: I18n.get('context.showSnippet'),
-            active: this.showSnippet(),
+            label: I18n.get('context.starredOnly'),
+            active: this.isStarredOnly(),
             isDarkMode: this.store.isDarkMode,
-            gap: 6,
+            gap: 0,
             onTap: () => {
-              this.store.toggleViewConfig(ViewConfigs.ShowSnippet);
+              this.store.switchFilter(this.isStarredOnly()
+                ? FilterType.Default : FilterType.StarredOnly);
             }
           })
           ChipView({
-            label: I18n.get('context.fadeRead'),
-            active: this.fadeRead(),
+            label: I18n.get('context.showHidden'),
+            active: this.store.filterHas(FilterType.ShowHidden),
             isDarkMode: this.store.isDarkMode,
-            gap: 6,
+            gap: 0,
             onTap: () => {
-              this.store.toggleViewConfig(ViewConfigs.FadeRead);
+              this.store.toggleFilter(FilterType.ShowHidden);
             }
           })
         }
+        .padding({ left: 12, right: 12 })
+      }
+      .scrollable(ScrollDirection.Horizontal)
+      .scrollBar(BarState.Off)
+      .align(Alignment.Start)
+      .width('100%')
+      .padding({ bottom: 8 })
+
+      // Per-view display options. Scrolls for the same reason the filter row does.
+      if (this.store.viewOptionsOpen) {
+        Scroll() {
+          Row() {
+            ChipView({
+              label: I18n.get('context.showCover'),
+              active: this.showCover(),
+              isDarkMode: this.store.isDarkMode,
+              gap: 6,
+              onTap: () => {
+                this.store.toggleViewConfig(ViewConfigs.ShowCover);
+              }
+            })
+            ChipView({
+              label: I18n.get('context.showSnippet'),
+              active: this.showSnippet(),
+              isDarkMode: this.store.isDarkMode,
+              gap: 6,
+              onTap: () => {
+                this.store.toggleViewConfig(ViewConfigs.ShowSnippet);
+              }
+            })
+            ChipView({
+              label: I18n.get('context.fadeRead'),
+              active: this.fadeRead(),
+              isDarkMode: this.store.isDarkMode,
+              gap: 6,
+              onTap: () => {
+                this.store.toggleViewConfig(ViewConfigs.FadeRead);
+              }
+            })
+          }
+          .padding({ left: 12, right: 12 })
+        }
+        .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
+        .align(Alignment.Start)
         .width('100%')
-        .padding({ left: 12, right: 12, bottom: 8 })
+        .padding({ bottom: 8 })
       }
 
       Divider().color(this.dividerColor()).strokeWidth(1)
