@@ -2768,6 +2768,23 @@ check('importAll writes it back after the settings',
 check('a restore rebuilds the page instead of waiting for a relaunch',
   indexSource.indexOf("router.replaceUrl({ url: 'pages/Index' })") >= 0
   && indexSource.indexOf('await this.reloadPage();') >= 0);
+section('the About block names the author and links the repository');
+check('the upstream port credit is gone', settingsPanel.indexOf('Ported from') < 0);
+check('the author is named with the catalogue label',
+  settingsPanel.indexOf("I18n.get('app.aboutAuthor')") >= 0
+  && settingsPanel.indexOf('simon2137') >= 0);
+check('a repository link sits beside the two documents',
+  settingsPanel.indexOf("I18n.get('app.repository')") >= 0
+  && settingsPanel.indexOf('this.onOpenRepository()') >= 0);
+check('the repository link is the project URL',
+  indexSource.indexOf("'https://github.com/simon2137/Sheaf-Reader'") >= 0);
+const licencesText: string =
+  fs.readFileSync(licencePath, 'utf8');
+check('the bundled licences open in Chinese',
+  licencesText.indexOf('开源许可') >= 0 && licencesText.indexOf('仓库地址：') >= 0);
+check('the licence bodies stay verbatim', 
+  licencesText.indexOf('BSD 3-Clause License') >= 0
+  && licencesText.indexOf('Apache License') >= 0);
 section('the settings panel does not scan the article store');
 check('the article size is summed in SQL',
   dbSource.indexOf(') AS total FROM articles') >= 0);

@@ -1,3 +1,10 @@
+# 束阅 / Sheaf Reader 的第三方与上游说明
+#
+# 中文摘要：本应用由 simon2137 以 ArkTS / ArkUI 重新实现，界面结构、数据模型与
+# 设置项语义以 Fluent Reader（BSD 3-Clause）为蓝本对齐；仓库地址
+# https://github.com/simon2137/Sheaf-Reader 。许可以下方英文原文为准。
+#
+# 以下为英文原始记录（法律依据，保持原文）。
 Sheaf Reader (束阅)
 Copyright (c) 2026, simon2137
 

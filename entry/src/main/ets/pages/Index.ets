@@ -330,6 +330,22 @@ struct Index {
     }, 2600);
   }
 
+  /**
+   * The public repository, opened from the About block. Kept next to the
+   * document links so a store reviewer finds the source from inside the app.
+   */
+  private openRepository(): void {
+    const url: string = 'https://github.com/simon2137/Sheaf-Reader';
+    BrowserLauncher.open(this.hostContext(), url).then((opened: boolean) => {
+      if (!opened) {
+        this.showToast(I18n.get('app.openFailed'));
+      }
+    }).catch((err: Error) => {
+      console.error('openRepository failed: ' + err.message);
+      this.showToast(I18n.get('app.openFailed'));
+    });
+  }
+
   /** Open an article in the system browser, reporting either failure. */
   private openExternal(article: Article): void {
     if (article.link.length === 0) {
@@ -562,6 +578,9 @@ struct Index {
         },
         onShowDoc: (title: string, path: string) => {
           this.openDoc(title, path);
+        },
+        onOpenRepository: () => {
+          this.openRepository();
         }
       }),
       autoCancel: true,

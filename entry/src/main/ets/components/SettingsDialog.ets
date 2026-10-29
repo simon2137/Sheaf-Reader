@@ -108,6 +108,9 @@ export struct SettingsDialog {
   /** Opens a bundled legal document (title for the header, rawfile path). */
   onShowDoc: (title: string, path: string) => void = () => {
   };
+  /** Opens the public repository in the system browser. */
+  onOpenRepository: () => void = () => {
+  };
 
   controller?: CustomDialogController;
 
@@ -712,7 +715,7 @@ export struct SettingsDialog {
                 .fontColor(this.secondaryColor())
                 .width('100%')
                 .margin({ top: 2 })
-              Text('Ported from Fluent Reader by yang991178')
+              Text(I18n.get('app.aboutAuthor') + ' simon2137')
                 .fontSize(11)
                 .fontColor(this.secondaryColor())
                 .width('100%')
@@ -741,6 +744,12 @@ export struct SettingsDialog {
               .height(TouchTarget.MIN)
               .margin({ left: 24 })
               .onClick(() => this.onShowDoc(I18n.get('app.licenses'), 'licenses/open-source.txt'))
+            Text(I18n.get('app.repository'))
+              .fontSize(12)
+              .fontColor('#0078D4')
+              .height(TouchTarget.MIN)
+              .margin({ left: 24 })
+              .onClick(() => this.onOpenRepository())
           }
           .width('100%')
           .alignItems(VerticalAlign.Center)

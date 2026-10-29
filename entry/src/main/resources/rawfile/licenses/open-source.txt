@@ -1,40 +1,57 @@
-Sheaf Reader (束阅)
-Copyright (c) 2026, simon2137
+开源许可
+Sheaf Reader 束阅 · 作者 simon2137
+仓库地址：https://github.com/simon2137/Sheaf-Reader
 
-This project — Sheaf Reader (束阅), formerly published as "Fluent Reader for
-HarmonyOS" — is an unofficial, community-made port of Fluent Reader to
-HarmonyOS Next (ArkTS / ArkUI). It is not affiliated with, endorsed by, or
-sponsored by the original author or by Huawei.
+Open-source licences
+Sheaf Reader (束阅) · author simon2137
+Repository: https://github.com/simon2137/Sheaf-Reader
 
-Based on:
-  Fluent Reader — https://github.com/yang991178/fluent-reader
-  Copyright (c) 2020, Haoyuan Liu (yang991178)
-  Licensed under the BSD 3-Clause License (see LICENSE).
 
-What is derived from the original project:
-  * the application's behaviour, layout logic, data model and settings
-    semantics, ported from its TypeScript/React sources;
-  * the `en-US` / `zh-CN` message catalogues (the other 17 upstream locales
-    were dropped), including the upstream message keys;
-  * the strings, service integrations and keyboard shortcuts that the port
-    reproduces in order to behave like the original.
+一、本应用
+  Sheaf Reader（束阅）是一个开源的 RSS 阅读器，用 ArkTS / ArkUI 为
+  HarmonyOS Next 重新实现。应用不设账号、不收集、不上传任何个人信息。
+  本项目为个人非官方项目，与上游 Fluent Reader 的作者、与华为均无隶属、
+  赞助或背书关系。
 
-What is not from the original project:
-  * the name "Sheaf Reader" / "束阅", all ArkTS/ArkUI code in this repository
-    (a re-implementation, not a transpilation), and the `com.sheafreader.app`
-    bundle identifier;
-  * the application launcher icons under `AppScope/resources` and
-    `entry/src/main/resources/base/media/`, which are placeholders drawn for
-    this port.
+  版权：Copyright (c) 2026, simon2137
+  许可：BSD 3-Clause（见下方全文）
 
-Renamed data markers (for anyone restoring an older backup):
-  * the backup format marker is `sheaf-reader-hm`; the pre-rename marker
-    `fluent-reader-hm` is still accepted on import.
 
-Third-party components:
-  * the 24x24 SVG icons under `entry/src/main/resources/base/media/` are icon
-    path data from Material Design Icons (Google), used under the Apache
-    License 2.0 — see `third_party/material-design-icons/`.
+二、上游项目
+  本应用的界面结构、数据模型与设置项语义以 Fluent Reader 为蓝本逐项对齐，
+  代码本身是重新实现，不搬运上游源码。
+
+  项目：Fluent Reader
+  地址：https://github.com/yang991178/fluent-reader
+  版权：Copyright (c) 2020, Haoyuan Liu (yang991178)
+  许可：BSD 3-Clause
+
+
+三、衍生与未衍生的范围
+  衍生自上游：
+    · 交互流程、布局逻辑、数据模型与设置项语义；
+    · en-US / zh-CN 两套文案（上游其余 17 种语言未采用），含上游的消息键名；
+    · 为保持行为一致而保留的字符串、服务集成方式与键盘快捷键。
+  非衍生自上游：
+    · 应用名称「Sheaf Reader」「束阅」，以及包名 com.sheafreader.app；
+    · 本仓库全部 ArkTS / ArkUI 代码（重新实现，非转译）；
+    · AppScope/resources 与 entry/src/main/resources/base/media 下的启动图标。
+
+
+四、第三方组件
+  · Material Design Icons（Google）—— 图标路径数据，Apache License 2.0；
+    全文见下方，原文件位于 third_party/material-design-icons/。
+  · HarmonyOS SDK 提供的系统组件按华为相应许可条款使用，不随本应用分发源码。
+
+
+五、旧标记兼容
+  备份文件的格式标记为 sheaf-reader-hm；改名前的 fluent-reader-hm 在导入时
+  仍然被接受，旧备份可以继续还原。
+
+
+六、许可全文（官方英文原文）
+  以下文本为许可证的官方英文原文，具有法律效力；为保证效力，正文不作翻译
+  或修改。中文说明仅用于帮助理解，与原文冲突时以英文原文为准。
 
 ------------------------------------------------------------------------
 BSD 3-Clause License (LICENSE)
