@@ -35,3 +35,6 @@ verify/entry-locales/
 __pycache__/
 *.pyc
 .dsh-file-attachment/
+
+# --- AGC 上架流程说明（仅本地，不发布） -----------------------------------
+docs/agc-submission.md
