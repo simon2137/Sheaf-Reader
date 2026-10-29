@@ -29,11 +29,9 @@
 
 ## 当前进度
 
-已完成 4 / 12：
+已完成 6 / 12（平板中英文齐）：
 
-- `tablet-zh-01-main.jpeg`
-- `tablet-zh-02-cards.jpeg`
-- `tablet-zh-03-settings.jpeg`
-- `tablet-en-03-settings.jpeg`
+- `tablet-zh-01-main.jpeg`、`tablet-zh-02-cards.jpeg`、`tablet-zh-03-settings.jpeg`
+- `tablet-en-01-main.jpeg`、`tablet-en-02-cards.jpeg`、`tablet-en-03-settings.jpeg`
 
-待采集：`tablet-en-01/02`，以及 `2in1-zh-*`、`2in1-en-*` 六张。
+待采集：`2in1-zh-*`、`2in1-en-*` 六张（需 `Huawei_2in1` 窗口最大化，1728vp 才出现三栏）。
