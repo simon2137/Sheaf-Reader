@@ -678,6 +678,10 @@ export struct SettingsDialog {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
+        // ArkUI 把滚动条画在 Scroll 自己的盒子里、贴着右边缘：内容占满宽度时
+        // 竖条会压在开关与下拉框的右缘上（模拟器上量到挤占约 12vp）。这里给竖条
+        // 留出独立通道，分隔线也不再伸到竖条底下。
+        .padding({ right: 12 })
       }
       .layoutWeight(1)
       .width('100%')

@@ -2609,6 +2609,24 @@ check('the document viewer reads the bundled text',
   && indexSource.indexOf("'privacy-policy.txt'") < 0
   && settingsPanel.indexOf("'privacy-policy.txt'") >= 0);
 
+// ---------------------------------------------------- scrolling dialogs
+//
+// ArkUI paints the scrollbar inside the Scroll's own box, flush with its right
+// edge, so a full-width child ends up underneath it. On the emulator the
+// settings dialog's bar crowded the switches and Selects by ~12vp (screenshot
+// 2026-10-29 19:59). Every scrolling dialog therefore insets its content and
+// leaves the bar a lane of its own.
+
+section('scrolling dialogs');
+
+for (const scrollingDialog of ['SettingsDialog', 'RulesDialog', 'ServiceSettingsDialog', 'DocumentDialog']) {
+  const dialogSrc: string = fs.readFileSync(etsRoot + '/components/' + scrollingDialog + '.ets', 'utf8');
+  check(scrollingDialog + ' leaves the scrollbar its own lane',
+    dialogSrc.indexOf('.scrollBar(BarState.Auto)') >= 0
+    && dialogSrc.indexOf('right: 12') >= 0,
+    scrollingDialog);
+}
+
 console.log('\n========================================');
 console.log('  passed: ' + passed + '   failed: ' + failed);
 console.log('========================================');

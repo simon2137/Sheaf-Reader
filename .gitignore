@@ -34,3 +34,4 @@ verify/entry-locales/
 # --- Python helpers (docs/icon-drafts generators) ---------------------------
 __pycache__/
 *.pyc
+.dsh-file-attachment/

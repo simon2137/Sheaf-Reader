@@ -58,6 +58,8 @@ export struct DocumentDialog {
           .fontColor(this.secondaryColor())
           .width('100%')
           .textAlign(TextAlign.Start)
+          // 滚动条占的是 Scroll 盒内的右边缘，正文占满宽度会被它压住。
+          .padding({ right: 12 })
       }
       .layoutWeight(1)
       .width('100%')

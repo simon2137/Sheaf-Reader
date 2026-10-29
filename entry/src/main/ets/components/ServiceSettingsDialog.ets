@@ -768,6 +768,8 @@ export struct ServiceSettingsDialog {
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)
+        // 滚动条画在 Scroll 盒内、贴右边缘，内容占满宽度会与之重叠；右侧留通道。
+        .padding({ right: 12 })
       }
       .layoutWeight(1)
       .width('100%')
