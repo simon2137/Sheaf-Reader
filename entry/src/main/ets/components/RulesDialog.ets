@@ -831,7 +831,9 @@ export struct RulesDialog {
       .margin({ top: 10 })
     }
     .width(600)
-    .height(720)
+    // 同 ServiceSettingsDialog：小窗口下固定 720 会把底部按钮切掉，跟随窗口高度
+    .height('88%')
+    .constraintSize({ maxHeight: 720 })
     .padding(24)
     .backgroundColor(this.surfaceColor())
     .borderRadius(10)

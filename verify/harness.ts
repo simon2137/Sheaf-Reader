@@ -2639,6 +2639,45 @@ for (const scrollingDialog of ['SettingsDialog', 'RulesDialog', 'ServiceSettings
     scrollingDialog);
 }
 
+// ---------------------------------------------------- tall dialogs, small windows
+//
+// The three tall panels were pinned to `.height(720)`. On the 2in1 emulator with
+// the window un-maximised the usable area is shorter than that, and the service
+// dialog's bottom row (移除服务 / 保存) was cut off by the window edge
+// (screenshot 2026-10-29 20:01). They now track the window height and keep 720
+// only as a ceiling; the body is already scrollable, so a shorter window scrolls
+// instead of hiding the buttons.
+
+section('tall dialogs fit short windows');
+
+for (const tallDialog of ['RulesDialog', 'ServiceSettingsDialog', 'DocumentDialog']) {
+  const tallSrc: string = fs.readFileSync(etsRoot + '/components/' + tallDialog + '.ets', 'utf8');
+  check(tallDialog + ' tracks the window height instead of a fixed 720',
+    tallSrc.indexOf(".height('88%')") >= 0
+    && tallSrc.indexOf('.constraintSize({ maxHeight: 720 })') >= 0
+    && tallSrc.indexOf('.height(720)') < 0,
+    tallDialog);
+}
+
+// ---------------------------------------------------- credentials are masked
+//
+// The Miniflux API token was a plain TextInput, so the stored token sat on screen
+// in clear text the moment the panel opened (screenshot 2026-10-29 20:01). Every
+// credential field masks by default and offers the built-in reveal toggle.
+
+section('credential fields are masked');
+
+const serviceSrc: string = fs.readFileSync(etsRoot + '/components/ServiceSettingsDialog.ets', 'utf8');
+check('the API token field masks its content',
+  /TextInput\(\{ placeholder: I18n\.get\('app\.apiToken'\)[\s\S]{0,200}?\.type\(InputType\.Password\)/.test(serviceSrc));
+check('the API token field offers the reveal toggle',
+  /I18n\.get\('app\.apiToken'\)[\s\S]{0,200}?\.showPasswordIcon\(true\)/.test(serviceSrc));
+check('the Inoreader app key field masks its content',
+  /I18n\.get\('app\.appKeyOptional'\)[\s\S]{0,200}?\.type\(InputType\.Password\)/.test(serviceSrc));
+check('every password field is masked',
+  (serviceSrc.match(/placeholder: I18n\.get\('service\.password'\)/g) || []).length
+  === (serviceSrc.match(/placeholder: I18n\.get\('service\.password'\)[\s\S]{0,120}?\.type\(InputType\.Password\)/g) || []).length);
+
 console.log('\n========================================');
 console.log('  passed: ' + passed + '   failed: ' + failed);
 console.log('========================================');

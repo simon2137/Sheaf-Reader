@@ -467,6 +467,9 @@ export struct ServiceSettingsDialog {
 
             if (this.useApiKey) {
               TextInput({ placeholder: I18n.get('app.apiToken'), text: this.apiKey })
+                // 令牌是凭据：默认打码，用框内自带的「眼睛」按钮按需显示明文
+                .type(InputType.Password)
+                .showPasswordIcon(true)
                 .width('100%')
                 .height(40)
                 .fontSize(14)
@@ -619,6 +622,9 @@ export struct ServiceSettingsDialog {
               })
 
             TextInput({ placeholder: I18n.get('app.appKeyOptional'), text: this.inoreaderKey })
+              // App Key 同属凭据，与 API 令牌一致打码 + 可显
+              .type(InputType.Password)
+              .showPasswordIcon(true)
               .width('100%')
               .height(40)
               .fontSize(14)
@@ -854,7 +860,11 @@ export struct ServiceSettingsDialog {
       .margin({ top: 10 })
     }
     .width(560)
-    .height(720)
+    // 小窗口（平板上以 PC 模式开窗、窗口未最大化）的内容区不足 720vp 时，固定
+    // 高度会把底部的「移除服务 / 保存」整排切掉（2026-10-29 设备取证）。跟随窗口
+    // 高度并保留 720 上限：正文本来就在 Scroll 里，窗口变矮只会滚动，不会丢按钮。
+    .height('88%')
+    .constraintSize({ maxHeight: 720 })
     .padding(24)
     .backgroundColor(this.surfaceColor())
     .borderRadius(10)

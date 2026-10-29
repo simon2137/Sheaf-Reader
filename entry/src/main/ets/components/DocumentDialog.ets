@@ -77,7 +77,9 @@ export struct DocumentDialog {
         })
     }
     .width(640)
-    .height(720)
+    // 小窗口下固定 720 会把「关闭」切到窗口外，跟随窗口高度并保留 720 上限
+    .height('88%')
+    .constraintSize({ maxHeight: 720 })
     .padding(24)
     .backgroundColor(this.surfaceColor())
     .borderRadius(10)
