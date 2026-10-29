@@ -29,9 +29,15 @@
 
 ## 当前进度
 
-已完成 6 / 12（平板中英文齐）：
+**12 / 12 完成**（2026-10-30）：
 
-- `tablet-zh-01-main.jpeg`、`tablet-zh-02-cards.jpeg`、`tablet-zh-03-settings.jpeg`
-- `tablet-en-01-main.jpeg`、`tablet-en-02-cards.jpeg`、`tablet-en-03-settings.jpeg`
+| 设备 | 中文 | 英文 |
+|---|---|---|
+| 平板 2560×1600 | `tablet-zh-01-main` / `-02-cards` / `-03-settings` | `tablet-en-01-main` / `-02-cards` / `-03-settings` |
+| 2-in-1 2160×1440 | `2in1-zh-01-main` / `-02-cards` / `-03-settings` | `2in1-en-01-main` / `-02-cards` / `-03-settings` |
 
-待采集：`2in1-zh-*`、`2in1-en-*` 六张（需 `Huawei_2in1` 窗口最大化，1728vp 才出现三栏）。
+采集数据：四个真实订阅源（小众软件 / 少数派 / 机核 / 爱范儿，共 60 篇，均带封面）通过
+「添加订阅源」按 URL 添加，未接入任何第三方账号；界面语言在应用内切换后各拍一套。
+
+注意：2-in-1 是**窗口最大化**（1728vp）才出现侧栏常驻的三栏布局；平板（1138vp）
+为抽屉式，主界面因此是「列表 + 阅读器」两栏。
