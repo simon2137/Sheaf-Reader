@@ -1,3 +1,4 @@
+import { bundleManager } from '@kit.AbilityKit';
 import { AppStore } from '../state/AppStore';
 import { DarkModeSetting } from '../model/Models';
 import { I18n } from '../utils/I18n';
@@ -88,6 +89,9 @@ export struct SettingsDialog {
   onMeasureCache: () => Promise<number> = async () => 0;
   onClearCache: () => void = () => {
   };
+  /** Opens a bundled legal document (title for the header, rawfile path). */
+  onShowDoc: (title: string, path: string) => void = () => {
+  };
 
   controller?: CustomDialogController;
 
@@ -104,6 +108,12 @@ export struct SettingsDialog {
   /** True while a delete is running, to keep the button from re-firing. */
   @State deleting: boolean = false;
   /**
+   * `versionName` as reported by the package manager. Kept as state and filled
+   * in `aboutToAppear` because the answer only exists on device; the fallback
+   * keeps the row readable if the bundle info cannot be read.
+   */
+  @State versionShown: string = '';
+  /**
    * Working copy of the reader's font size.
    *
    * A `CustomDialogController` builds its content once, when the dialog is
@@ -119,6 +129,22 @@ export struct SettingsDialog {
     this.fontSizeShown = this.store.settings.fontSize;
     this.measureArticles();
     this.measureCache();
+    this.versionShown = SettingsDialog.readVersion();
+  }
+
+  /**
+   * `versionName` straight from the package manager, so the About row can never
+   * drift from `AppScope/app.json5` the way the previous hardcoded string did
+   * (it still read 1.0.1 after the manifest had moved on). Returning an empty
+   * string keeps the row from printing "undefined" when the call fails.
+   */
+  private static readVersion(): string {
+    try {
+      const info = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
+      return info.versionName;
+    } catch (err) {
+      return '';
+    }
   }
 
   private async measureArticles(): Promise<void> {
@@ -611,7 +637,7 @@ export struct SettingsDialog {
                 .fontWeight(FontWeight.Medium)
                 .fontColor(this.textColor())
                 .width('100%')
-              Text(I18n.get('settings.version') + ' 1.0.2  ·  BSD-3-Clause')
+              Text(I18n.get('settings.version') + ' ' + this.versionShown)
                 .fontSize(11)
                 .fontColor(this.secondaryColor())
                 .width('100%')
@@ -627,7 +653,28 @@ export struct SettingsDialog {
             .margin({ left: 12 })
           }
           .width('100%')
-          .margin({ top: 8, bottom: 16 })
+          .margin({ top: 8 })
+
+          /**
+           * 上架合规入口：隐私政策与开源许可全文都随包分发（`resources/rawfile`），
+           * 断网也可读，且不依赖任何外部网页。
+           */
+          Row() {
+            Text(I18n.get('app.privacyPolicy'))
+              .fontSize(12)
+              .fontColor('#0078D4')
+              .height(TouchTarget.MIN)
+              .onClick(() => this.onShowDoc(I18n.get('app.privacyPolicy'), 'privacy-policy.txt'))
+            Text(I18n.get('app.licenses'))
+              .fontSize(12)
+              .fontColor('#0078D4')
+              .height(TouchTarget.MIN)
+              .margin({ left: 24 })
+              .onClick(() => this.onShowDoc(I18n.get('app.licenses'), 'licenses/NOTICE.txt'))
+          }
+          .width('100%')
+          .alignItems(VerticalAlign.Center)
+          .margin({ bottom: 16 })
         }
         .width('100%')
         .alignItems(HorizontalAlign.Start)

@@ -1,0 +1,95 @@
+Sheaf Reader 束阅 · 隐私政策
+Privacy Policy
+
+最后更新 / Last updated: 2026-10-29
+
+Sheaf Reader 束阅（以下简称「本应用」）是一个开源、离线的 RSS 阅读器。
+一句话概括：本应用不设账号、不收集、不上传任何个人信息；你的订阅源、文章、
+设置与凭据都只保存在你自己的设备上。
+
+In one sentence: Sheaf Reader has no account system, collects nothing, and
+uploads nothing. Your feeds, articles, settings and credentials stay on your
+own device.
+
+一、我们收集哪些信息
+本应用不收集任何个人信息，也没有统计、广告或崩溃上报 SDK。
+- 无账号、无登录、无手机号或邮箱收集。
+- 无设备标识符、位置、通讯录、相册等信息的读取。
+- 本应用仅申请一项权限：网络访问（ohos.permission.INTERNET），用于获取
+  你自行添加的 RSS 订阅内容。
+
+1. What we collect
+Nothing. There is no account system, no analytics, no advertising and no crash
+reporting SDK. The app requests a single permission, network access
+(ohos.permission.INTERNET), which is used only to fetch the RSS feeds you add.
+
+二、数据保存在哪里
+- 订阅源、文章、已读 / 星标状态、界面设置均保存在本应用的本地沙箱内。
+- 同步服务的服务器地址与 API 令牌保存在本机，仅用于向该服务发起鉴权请求。
+- 备份文件由你主动导出到你选择的位置，内容为明文，请自行妥善保管。
+- 卸载本应用或在系统设置中「清除数据」会删除上述本地数据。
+
+2. Where data lives
+Feeds, articles, read/starred state and preferences are stored in the app's
+local sandbox. Sync server addresses and API tokens are stored on the device
+and used only to authenticate against the service you configured yourself.
+Backups are written in plain text to a location you pick. Uninstalling the app
+(or clearing its data in system settings) deletes all of it.
+
+三、网络请求发往何处
+本应用只会连接以下两类地址，且都由你提供：
+- 你添加的 RSS 订阅源地址；
+- 你主动配置的同步服务（Miniflux、Google Reader、Inoreader、Feedbin、
+  Nextcloud News、Fever）。
+此外，为了让订阅列表显示缩略图，本应用会向你订阅源文章中引用的图片地址
+发起请求。这些第三方服务器可能依据其自身隐私政策记录你的 IP 地址。本应用
+不向上述任何一方附加设备标识或个人信息。
+
+3. Where requests go
+The app contacts only addresses you supply: the feed URLs you add, and the
+sync service you configure. To show thumbnails it also requests images
+referenced by your articles; those third-party servers may log your IP address
+under their own policies. No device identifiers or personal data are attached
+to any request.
+
+四、第三方服务
+本应用不集成第三方广告、统计或社交 SDK。当你点击文章中的链接时，内容会在
+内置浏览器（系统 ArkWeb 组件）中打开；被访问网站的隐私实践由其自身决定，
+不在本政策范围内。
+
+4. Third-party services
+No third-party advertising, analytics or social SDKs are bundled. Links you
+open are shown in the built-in browser (the system ArkWeb component); the
+privacy practices of those websites are their own and outside this policy.
+
+五、儿童
+本应用不面向 14 周岁以下儿童提供服务，也不会有针对性地收集儿童信息。
+
+5. Children
+The app is not directed at children under 14 and does not knowingly collect
+information from them.
+
+六、你的权利
+由于本应用不在服务器端保存任何数据，你无需申请导出或删除数据：卸载本应用
+即可清除全部本地数据，你也可以随时在应用内删除单个订阅源、文章或清空缓存。
+
+6. Your rights
+Because nothing is stored on a server, there is nothing to export or delete
+remotely: uninstalling clears all local data, and you can delete individual
+feeds, articles or the cache inside the app at any time.
+
+七、政策变更
+本政策的更新会随应用版本一起发布，最新版本始终内置在应用中
+（设置 → 关于 → 隐私政策）。
+
+7. Changes
+Updates ship inside the app; the current version is always available in
+Settings → About → Privacy Policy.
+
+八、联系我们
+如对本政策有疑问，请在项目仓库提交 Issue：
+https://github.com/simon2137/Sheaf-Reader/issues
+
+8. Contact
+Questions about this policy: open an issue at
+https://github.com/simon2137/Sheaf-Reader/issues

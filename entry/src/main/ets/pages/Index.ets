@@ -15,7 +15,9 @@ import { GroupDialog } from '../components/GroupDialog';
 import { GroupSettingsDialog } from '../components/GroupSettingsDialog';
 import { ServiceSettingsDialog } from '../components/ServiceSettingsDialog';
 import { RulesDialog } from '../components/RulesDialog';
+import { DocumentDialog } from '../components/DocumentDialog';
 import { LogMenuView } from '../components/LogMenuView';
+import { BundledText } from '../utils/BundledText';
 import { OpmlFileService } from '../utils/OpmlFileService';
 import { ImageActions } from '../utils/ImageActions';
 import { BrowserLauncher } from '../utils/BrowserLauncher';
@@ -74,6 +76,8 @@ struct Index {
   private rulesDialog: CustomDialogController | null = null;
   private feedSettingsDialog: CustomDialogController | null = null;
   private groupSettingsDialog: CustomDialogController | null = null;
+  /** Viewer for the bundled legal documents (privacy policy / licences). */
+  private docDialog: CustomDialogController | null = null;
   private refreshTimer: number = -1;
   /** Mirrors the original's `app.settings.display` guard for the fetch timer. */
   private settingsOpen: boolean = false;
@@ -547,6 +551,9 @@ struct Index {
         onClearCache: async () => {
           await CacheService.clear(this.hostContext());
           this.showToast(I18n.get('app.cacheCleared'));
+        },
+        onShowDoc: (title: string, path: string) => {
+          this.openDoc(title, path);
         }
       }),
       autoCancel: true,
@@ -663,6 +670,29 @@ struct Index {
       this.settingsDialog.close();
     }
     this.settingsOpen = false;
+  }
+
+  /**
+   * Opens one of the documents that ship inside the HAP. Both the privacy
+   * policy and the third-party licence texts live in `resources/rawfile`, so
+   * they can be read with the device offline and the BSD-3-Clause notice really
+   * does travel with the binary.
+   *
+   * The dialog is created once and rebuilt per call: the body is state of the
+   * controller's builder, so the text has to be captured at open time.
+   */
+  private async openDoc(title: string, path: string): Promise<void> {
+    const body: string = await BundledText.read(this.hostContext(), path);
+    this.docDialog = new CustomDialogController({
+      builder: DocumentDialog({
+        title: title,
+        body: body
+      }),
+      autoCancel: true,
+      alignment: DialogAlignment.Center,
+      customStyle: true
+    });
+    this.docDialog.open();
   }
 
   // ------------------------------------------------------------ automation

@@ -2547,6 +2547,68 @@ check('the rules panel still offers the author scope',
   rulesPanel.indexOf('RuleSearchScope.Creator') >= 0
   && rulesPanel.indexOf("I18n.get('rules.creator')") >= 0);
 
+// ------------------------------------------------- AGC submission packaging
+//
+// Everything below exists because the app is being prepared for an AppGallery
+// submission: the bundle identifier must be the final one, the privacy policy
+// and the third-party licence texts must travel inside the HAP (BSD-3-Clause
+// clause 2 requires the notice in binary distributions), the version shown in
+// the About row must come from the package manager rather than a literal, and
+// only the two locales the app actually ships may be present.
+
+section('AGC submission packaging');
+
+const appJson5: string = fs.readFileSync('../AppScope/app.json5', 'utf8');
+const noticeText: string = fs.readFileSync('../NOTICE', 'utf8');
+const rawfileRoot: string = '../entry/src/main/resources/rawfile';
+const privacyPath: string = rawfileRoot + '/privacy-policy.txt';
+const licencePath: string = rawfileRoot + '/licenses/open-source.txt';
+check('the bundle identifier is the store-facing one',
+  appJson5.indexOf('"bundleName": "com.sheafreader.app"') >= 0
+  && appJson5.indexOf('com.sheafreader.hm') < 0);
+check('the notice carries the same identifier',
+  noticeText.indexOf('com.sheafreader.app') >= 0
+  && noticeText.indexOf('com.sheafreader.hm') < 0);
+
+const privacyText: string = fs.existsSync(privacyPath)
+  ? fs.readFileSync(privacyPath, 'utf8') : '';
+const licenceText: string = fs.existsSync(licencePath)
+  ? fs.readFileSync(licencePath, 'utf8') : '';
+check('the privacy policy is bundled with the app', privacyText.length > 500);
+check('the licence notice is bundled with the app', licenceText.length > 500);
+check('the bundled notice keeps both licences',
+  licenceText.indexOf('BSD 3-Clause License') >= 0
+  && licenceText.indexOf('Apache License') >= 0
+  && licenceText.indexOf('yang991178') >= 0);
+check('the policy states what the app actually does',
+  privacyText.indexOf('ohos.permission.INTERNET') >= 0
+  && privacyText.indexOf('Miniflux') >= 0
+  && privacyText.indexOf('Sheaf-Reader/issues') >= 0);
+
+const i18nFiles: string[] = fs.readdirSync(rawfileRoot + '/i18n') as string[];
+const i18nDecl: string = fs.readFileSync(etsRoot + '/utils/I18n.ets', 'utf8');
+check('only the two shipped locales are packaged',
+  i18nFiles.sort().join(',') === 'en-US.json,zh-CN.json'
+  && i18nDecl.indexOf("'en-US'") >= 0
+  && i18nDecl.indexOf("'zh-CN'") >= 0
+  && i18nDecl.indexOf("'ja-JP'") < 0
+  && i18nDecl.indexOf("'de-DE'") < 0);
+
+check('the About panel offers both documents',
+  settingsPanel.indexOf("I18n.get('app.privacyPolicy')") >= 0
+  && settingsPanel.indexOf("I18n.get('app.licenses')") >= 0
+  && settingsPanel.indexOf("this.onShowDoc(") >= 0);
+check('the About version is read from the package manager',
+  settingsPanel.indexOf('bundleManager.getBundleInfoForSelfSync') >= 0
+  && settingsPanel.indexOf('this.versionShown') >= 0
+  && settingsPanel.indexOf("' 1.0.") < 0);
+check('the document viewer reads the bundled text',
+  indexSource.indexOf('DocumentDialog(') >= 0
+  && indexSource.indexOf('BundledText.read(this.hostContext()') >= 0
+  && indexSource.indexOf("'licenses/NOTICE.txt'") < 0
+  && indexSource.indexOf("'privacy-policy.txt'") < 0
+  && settingsPanel.indexOf("'privacy-policy.txt'") >= 0);
+
 console.log('\n========================================');
 console.log('  passed: ' + passed + '   failed: ' + failed);
 console.log('========================================');

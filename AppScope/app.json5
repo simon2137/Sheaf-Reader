@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.sheafreader.hm",
+    "bundleName": "com.sheafreader.app",
     "vendor": "sheafreader",
     "versionCode": 1000002,
     "versionName": "1.0.2",

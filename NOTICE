@@ -21,7 +21,7 @@ What is derived from the original project:
 
 What is not from the original project:
   * the name "Sheaf Reader" / "束阅", all ArkTS/ArkUI code in this repository
-    (a re-implementation, not a transpilation), and the `com.sheafreader.hm`
+    (a re-implementation, not a transpilation), and the `com.sheafreader.app`
     bundle identifier;
   * the application launcher icons under `AppScope/resources` and
     `entry/src/main/resources/base/media/`, which are placeholders drawn for
