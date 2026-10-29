@@ -111,6 +111,5 @@ Copyright (c) 2026, simon2137 — Sheaf Reader (束阅), HarmonyOS port
 全文见 [LICENSE](LICENSE)，派生说明与第三方组件（图标为 Material Design Icons，Apache-2.0）见 [NOTICE](NOTICE)。
 
 **随包分发**：`NOTICE`、BSD-3-Clause 全文与 Apache-2.0 全文也打包进应用，
-设置 → 关于 →「开源许可」可离线阅读；「隐私政策」同理。上架准备进度见
-[AppGallery 上架清单](docs/agc-submission.md)，隐私政策正文见
-[隐私政策](docs/privacy-policy.md)。
+设置 → 关于 →「开源许可」可离线阅读；「隐私政策」同理。隐私政策正文见
+[隐私政策](docs/privacy-policy.md)，商店截图规格见 [docs/store](docs/store/README.md)。
