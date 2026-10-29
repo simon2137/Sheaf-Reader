@@ -22,6 +22,21 @@ export class BackupFile {
   articles: Article[] = [];
 }
 
+/**
+ * The shape actually read off disk. `settings` is a plain object here, because
+ * that is what `JSON.parse` produces; `BackupFile` keeps the Map the in-memory
+ * code wants, and `parse` converts between the two.
+ */
+export interface BackupPayload {
+  format: string;
+  version: number;
+  exportedAt: number;
+  settings: Record<string, string>;
+  groups: FeedGroup[];
+  feeds: Feed[];
+  articles: Article[];
+}
+
 /** What a backup or restore did, for reporting back to the user. */
 export class BackupOutcome {
   ok: boolean = false;
@@ -76,23 +91,54 @@ export class BackupService {
       return null;
     }
     try {
-      const parsed: BackupFile = JSON.parse(content) as BackupFile;
-      if (parsed === null || parsed === undefined
-        || parsed.feeds === undefined || parsed.feeds === null) {
+      // Parsed through the on-disk shape, not `BackupFile`: `JSON.parse` yields
+      // a plain object for `settings`, so the class's `Map<string, string>` is
+      // only a compile-time promise and `Map.prototype.forEach` does not exist
+      // on it. Restore died with `is not callable` inside `setSettings` for
+      // exactly that reason (measured on device with a 188-byte backup).
+      const raw: BackupPayload = JSON.parse(content) as BackupPayload;
+      if (raw === null || raw === undefined
+        || raw.feeds === undefined || raw.feeds === null) {
         return null;
       }
       // Guard against a truncated or unrelated JSON file. The pre-rename marker
       // is still accepted, so a backup exported before the project was renamed
       // (Fluent Reader for HarmonyOS -> Sheaf Reader) keeps restoring.
-      if (parsed.format !== BackupFile.FORMAT
-        && parsed.format !== BackupFile.LEGACY_FORMAT) {
+      if (raw.format !== BackupFile.FORMAT && raw.format !== BackupFile.LEGACY_FORMAT) {
         return null;
+      }
+      const parsed: BackupFile = new BackupFile();
+      parsed.format = raw.format;
+      parsed.version = raw.version;
+      parsed.exportedAt = raw.exportedAt;
+      parsed.settings = BackupService.toSettings(raw.settings);
+      if (raw.groups !== undefined && raw.groups !== null) {
+        parsed.groups = raw.groups;
+      }
+      parsed.feeds = raw.feeds;
+      if (raw.articles !== undefined && raw.articles !== null) {
+        parsed.articles = raw.articles;
       }
       return parsed;
     } catch (err) {
       console.error('BackupService: malformed backup file');
       return null;
     }
+  }
+
+  /** `settings` arrives as a plain JSON object; build the Map the rest expects. */
+  private static toSettings(raw: Record<string, string> | undefined): Map<string, string> {
+    const settings: Map<string, string> = new Map<string, string>();
+    if (raw === undefined || raw === null) {
+      return settings;
+    }
+    for (const key of Object.keys(raw)) {
+      const value: string = raw[key];
+      if (typeof value === 'string') {
+        settings.set(key, value);
+      }
+    }
+    return settings;
   }
 
   /**

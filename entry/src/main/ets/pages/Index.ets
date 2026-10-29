@@ -679,6 +679,7 @@ struct Index {
       return;
     }
     this.pendingRestore = result.text;
+    AppStorage.setOrCreate('sheafReaderRestorePayload', result.text);
     AppStorage.setOrCreate('sheafReaderRestoreSummary',
       preview.feeds + '|' + preview.articles);
     // Anything modal opened while the picker's window is going away is dropped
@@ -690,23 +691,47 @@ struct Index {
 
   /** The user confirmed the restore shown in the settings panel. */
   private async applyRestore(): Promise<void> {
-    const content: string = this.pendingRestore;
+    // Kept in AppStorage as well: the panel that shows the confirmation can
+    // outlive a page rebuild, and a lost payload made the button look dead.
+    const stored: string | undefined = AppStorage.get<string>('sheafReaderRestorePayload');
+    const content: string = this.pendingRestore.length > 0
+      ? this.pendingRestore
+      : (stored !== undefined ? stored : '');
     this.pendingRestore = '';
+    AppStorage.setOrCreate('sheafReaderRestorePayload', '');
     AppStorage.setOrCreate('sheafReaderRestoreSummary', '');
     if (content.length === 0) {
       return;
     }
     this.closeSettings();
-    const outcome: BackupOutcome = await this.store.restoreBackup(content);
-    if (outcome.ok) {
-      // The backup carries the language setting, so re-apply it.
-      await I18n.init(this.hostContext(), this.store.locale);
-      this.showToast(I18n.get('app.backupRestored',
-        new Map<string, string | number>([
-          ['feeds', outcome.feeds], ['articles', outcome.articles]
-        ])));
-    } else {
+    try {
+      const outcome: BackupOutcome = await this.store.restoreBackup(content);
+      console.error('restore result ok=' + outcome.ok + ' feeds=' + outcome.feeds
+        + ' articles=' + outcome.articles + ' message=' + outcome.message);
+      if (outcome.ok) {
+        // The backup carries the language setting, so re-apply it.
+        try {
+          await I18n.init(this.hostContext(), this.store.locale);
+        } catch (err) {
+          const languageError: Error = err as Error;
+          console.error('restore: language re-init failed: ' + languageError.message);
+        }
+        this.showToast(I18n.get('app.backupRestored',
+          new Map<string, string | number>([
+            ['feeds', outcome.feeds], ['articles', outcome.articles]
+          ])));
+        return;
+      }
+      console.error('restore: backup rejected by the store: ' + outcome.message);
       this.showToast(I18n.get('app.backupInvalid'));
+    } catch (err) {
+      // A rejection inside an onClick handler used to vanish without a trace,
+      // so the button looked dead. Say what went wrong instead.
+      const error: Error = err as Error;
+      console.error('restore failed: ' + error.message);
+      console.error('restore stack: ' + error.stack);
+      this.showToast(I18n.get('app.restoreFailed',
+        new Map<string, string | number>([['reason', error.message]])));
     }
   }
 

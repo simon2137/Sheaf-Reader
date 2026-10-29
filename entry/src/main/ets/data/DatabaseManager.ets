@@ -1,4 +1,5 @@
 import { relationalStore } from '@kit.ArkData';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { common } from '@kit.AbilityKit';
 import { Feed, Article, FeedGroup, ServiceArticleRow } from '../model/Models';
 import { FeedFilter, FilterClause } from '../model/Filter';
@@ -625,8 +626,39 @@ export class DatabaseManager {
    * "Around N MB of local storage is occupied by articles" hint.
    */
   async getArticleStorageBytes(): Promise<number> {
-    const articles: Article[] = await this.getAllArticles();
-    return StorageSize.totalBytes(articles);
+    // Summed in SQL rather than in JS: this used to call `getAllArticles()`,
+    // which materialises every row — full content included — before walking it,
+    // so opening 选项 froze for seconds once a few thousand articles were
+    // stored (reported on device). The columns are the same text fields the
+    // per-row measure reads; the result only feeds an "≈ N MB" hint.
+    if (!this.store) {
+      return 0;
+    }
+    const sql: string = 'SELECT SUM('
+      + "LENGTH(IFNULL(title, '')) + LENGTH(IFNULL(link, ''))"
+      + " + LENGTH(IFNULL(author, '')) + LENGTH(IFNULL(content, ''))"
+      + " + LENGTH(IFNULL(snippet, '')) + LENGTH(IFNULL(image_url, ''))"
+      + " + LENGTH(IFNULL(guid, '')) + LENGTH(IFNULL(service_ref, ''))"
+      + ') AS total FROM articles';
+    try {
+      const resultSet: relationalStore.ResultSet = await this.store.querySql(sql);
+      try {
+        if (!resultSet.goToFirstRow()) {
+          return 0;
+        }
+        const index: number = resultSet.getColumnIndex('total');
+        if (index < 0) {
+          return 0;
+        }
+        return resultSet.getLong(index);
+      } finally {
+        resultSet.close();
+      }
+    } catch (err) {
+      const error: BusinessError = err as BusinessError;
+      console.error('DatabaseManager.getArticleStorageBytes failed: ' + error.message);
+      return 0;
+    }
   }
 
   private parseArticleRow(resultSet: relationalStore.ResultSet): Article {

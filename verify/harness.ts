@@ -2742,6 +2742,24 @@ check('restore no longer opens a dialog straight after the picker',
   indexSource.indexOf('this.confirmRestore(') < 0
   && indexSource.indexOf('getPromptAction().showDialog') < 0);
 
+const backupSource: string = fs.readFileSync(etsRoot + '/services/BackupService.ets', 'utf8');
+const dbSource: string = fs.readFileSync(etsRoot + '/data/DatabaseManager.ets', 'utf8');
+section('backup restore survives a real .frdata round trip');
+check('parse rebuilds the settings Map that JSON.parse flattens',
+  backupSource.indexOf('BackupService.toSettings(raw.settings)') >= 0
+  && backupSource.indexOf('for (const key of Object.keys(raw))') >= 0);
+check('setSettings still expects a Map (no plain-object forEach)',
+  dbSource.indexOf('settings.forEach((value: string, key: string)') >= 0);
+check('the restore payload is also kept in AppStorage',
+  indexSource.indexOf("AppStorage.setOrCreate('sheafReaderRestorePayload', result.text)") >= 0
+  && indexSource.indexOf("AppStorage.get<string>('sheafReaderRestorePayload')") >= 0);
+check('a rejected restore is reported instead of vanishing',
+  indexSource.indexOf("console.error('restore failed: ' + error.message)") >= 0
+  && indexSource.indexOf("I18n.get('app.restoreFailed'") >= 0);
+
+section('the settings panel does not scan the article store');
+check('the article size is summed in SQL',
+  dbSource.indexOf(') AS total FROM articles') >= 0);
 console.log('\n========================================');
 console.log('  passed: ' + passed + '   failed: ' + failed);
 console.log('========================================');
