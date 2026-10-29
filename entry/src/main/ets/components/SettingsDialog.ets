@@ -670,7 +670,7 @@ export struct SettingsDialog {
               .fontColor('#0078D4')
               .height(TouchTarget.MIN)
               .margin({ left: 24 })
-              .onClick(() => this.onShowDoc(I18n.get('app.licenses'), 'licenses/NOTICE.txt'))
+              .onClick(() => this.onShowDoc(I18n.get('app.licenses'), 'licenses/open-source.txt'))
           }
           .width('100%')
           .alignItems(VerticalAlign.Center)

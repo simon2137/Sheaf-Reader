@@ -2608,6 +2608,18 @@ check('the document viewer reads the bundled text',
   && indexSource.indexOf("'licenses/NOTICE.txt'") < 0
   && indexSource.indexOf("'privacy-policy.txt'") < 0
   && settingsPanel.indexOf("'privacy-policy.txt'") >= 0);
+// The About links name their rawfile path as a literal. Nothing used to tie that
+// literal to the files on disk, so `licenses/NOTICE.txt` shipped while the
+// packaged file was `licenses/open-source.txt`: the viewer sat on「加载中…」
+// forever on the emulator (2026-10-29). Pin both links to real files.
+check('both About links point at files that actually ship',
+  settingsPanel.indexOf("this.onShowDoc(I18n.get('app.privacyPolicy'), 'privacy-policy.txt')") >= 0
+  && settingsPanel.indexOf("this.onShowDoc(I18n.get('app.licenses'), 'licenses/open-source.txt')") >= 0
+  && fs.existsSync(privacyPath)
+  && fs.existsSync(licencePath));
+check('a missing document is named instead of spinning forever',
+  indexSource.indexOf("I18n.get('app.docUnavailable')") >= 0
+  && indexSource.indexOf('text.length > 0 ? text :') >= 0);
 
 // ---------------------------------------------------- scrolling dialogs
 //

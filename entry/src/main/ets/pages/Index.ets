@@ -682,7 +682,10 @@ struct Index {
    * controller's builder, so the text has to be captured at open time.
    */
   private async openDoc(title: string, path: string): Promise<void> {
-    const body: string = await BundledText.read(this.hostContext(), path);
+    const text: string = await BundledText.read(this.hostContext(), path);
+    // 读不到时不能只留一个「加载中…」：打包漏了 rawfile 是构建缺陷，界面上要把
+    // 缺失的路径显式说出来，否则评审/用户只看到永远转不完的加载态。
+    const body: string = text.length > 0 ? text : I18n.get('app.docUnavailable') + ' ' + path;
     this.docDialog = new CustomDialogController({
       builder: DocumentDialog({
         title: title,
