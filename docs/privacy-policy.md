@@ -2,7 +2,9 @@
 
 > 应用内展示的是随包分发的纯文本版：`entry/src/main/resources/rawfile/privacy-policy.txt`
 > （设置 → 关于 → 隐私政策）。两份内容由 `verify/harness.ts` 的关键句断言保持一致。
-> AppGallery 后台「隐私政策」字段请填写本文件的 GitHraw 或 Pages 地址。
+> AppGallery 后台「隐私政策」字段填 AGC 协议中心托管的那一版（2026-11-01 起）：
+> <https://agreement-drcn.hispace.dbankcloud.cn/index.html?lang=zh&agreementId=2073951309513415360>
+> （英文条目同一篇，`lang=en`）。线上正文要与本文件、与随包纯文本逐字一致。
 
 Sheaf Reader 束阅（以下简称「本应用」）是一个开源、离线的 RSS 阅读器。
 一句话概括：本应用不设账号、不收集、不上传任何个人信息；你的订阅源、文章、
