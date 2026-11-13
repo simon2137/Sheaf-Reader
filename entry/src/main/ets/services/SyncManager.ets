@@ -799,11 +799,15 @@ export class SyncManager {
   }
 
   /**
-   * Disconnect the service, keeping downloaded articles locally.
+   * Disconnect the service and delete the subscriptions it owned.
+   *
+   * The service is the source of truth for the feeds it manages, so keeping
+   * them locally as plain sources would only restore the link on the next
+   * sync. Locally added sources, groups and their articles stay untouched.
    */
   static async removeService(): Promise<void> {
     const db: DatabaseManager = DatabaseManager.getInstance();
-    await db.unlinkAllServiceFeeds();
+    await db.deleteServiceFeeds();
     const cleared: ServiceConfigs = new ServiceConfigs();
     await SyncManager.saveConfigs(cleared);
   }

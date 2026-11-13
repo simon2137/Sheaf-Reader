@@ -301,38 +301,44 @@ export struct FeedSettingsDialog {
        * The dropdown shows its placeholder (`groups.chooseGroup`) until a group
        * is chosen, and the button stays disabled until then — both exactly as
        * `groups.tsx` does it.
+       *
+       * Hidden while the delete confirmation is up: the dialog is not scroll-
+       * able, and this block is tall enough that keeping it would push the
+       * action row past the bottom edge.
        */
-      Text(I18n.get('groups.selectedSource'))
-        .fontSize(12)
-        .fontColor(this.secondaryColor())
+      if (!this.confirmingDelete) {
+        Text(I18n.get('groups.selectedSource'))
+          .fontSize(12)
+          .fontColor(this.secondaryColor())
+          .width('100%')
+          .margin({ bottom: 6 })
+
+        Row() {
+          Select(this.groupOptions())
+            .selected(this.groupIndex)
+            .value(this.groupIndex >= 0 && this.groupIndex < this.groupNames.length
+              ? this.groupNames[this.groupIndex]
+              : I18n.get('groups.chooseGroup'))
+            .themedSelect(this.textColor())
+            .layoutWeight(1)
+            .onSelect((index: number) => {
+              this.groupIndex = index;
+            })
+
+          Button(I18n.get('groups.addToGroup'))
+            .fontSize(13)
+            .fontColor(Color.White)
+            .backgroundColor('#0078D4')
+            .enabled(this.groupIndex >= 0 && this.groupIndex !== this.initialGroupIndex)
+            .margin({ left: 8 })
+            .onClick(async () => {
+              await this.onAssignGroup(this.groupIndex);
+              this.initialGroupIndex = this.groupIndex;
+            })
+        }
         .width('100%')
-        .margin({ bottom: 6 })
-
-      Row() {
-        Select(this.groupOptions())
-          .selected(this.groupIndex)
-          .value(this.groupIndex >= 0 && this.groupIndex < this.groupNames.length
-            ? this.groupNames[this.groupIndex]
-            : I18n.get('groups.chooseGroup'))
-          .themedSelect(this.textColor())
-          .layoutWeight(1)
-          .onSelect((index: number) => {
-            this.groupIndex = index;
-          })
-
-        Button(I18n.get('groups.addToGroup'))
-          .fontSize(13)
-          .fontColor(Color.White)
-          .backgroundColor('#0078D4')
-          .enabled(this.groupIndex >= 0 && this.groupIndex !== this.initialGroupIndex)
-          .margin({ left: 8 })
-          .onClick(async () => {
-            await this.onAssignGroup(this.groupIndex);
-            this.initialGroupIndex = this.groupIndex;
-          })
+        .margin({ bottom: 16 })
       }
-      .width('100%')
-      .margin({ bottom: 16 })
 
       if (this.confirmingDelete) {
         Text(I18n.get('sources.deleteWarning'))

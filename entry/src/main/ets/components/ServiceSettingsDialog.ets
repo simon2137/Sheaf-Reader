@@ -79,6 +79,12 @@ export struct ServiceSettingsDialog {
   @State status: string = '';
   @State testing: boolean = false;
   /**
+   * "Remove service" deletes every subscription the service owns, so it takes
+   * two taps: the first one turns the button into a confirmation and reveals
+   * what will be deleted, the second one removes it.
+   */
+  @State confirmingRemove: boolean = false;
+  /**
    * Index shown by the service picker.
    *
    * A `@State` drives `.value()` rather than a call over `serviceType`: the
@@ -397,6 +403,7 @@ export struct ServiceSettingsDialog {
               this.servicePick = index;
               this.serviceType = this.serviceTypeAt(index);
               this.status = '';
+              this.confirmingRemove = false;
             })
 
           /*
@@ -784,6 +791,20 @@ export struct ServiceSettingsDialog {
 
       Divider().color(this.dividerColor()).strokeWidth(1).margin({ top: 12 })
 
+      // The warning sits beside the button it describes, not in the scroll
+      // body: the body is long enough to push it below the fold.
+      if (this.confirmingRemove && this.linkedCount > 0) {
+        Text(I18n.get('app.removeServiceDeletes',
+          new Map<string, string | number>([['count', this.linkedCount]])))
+          .fontSize(12)
+          .fontColor('#D13438')
+          .width('100%')
+          .padding(8)
+          .borderRadius(4)
+          .backgroundColor(this.isDarkMode ? '#442726' : '#FDE7E9')
+          .margin({ top: 10 })
+      }
+
       // Actions
       if (this.serviceType !== SyncService.None) {
         Row() {
@@ -829,13 +850,17 @@ export struct ServiceSettingsDialog {
       }
 
       Row() {
-        Button(I18n.get('app.removeService'))
+        Button(this.confirmingRemove ? I18n.get('app.removeServiceConfirm') : I18n.get('app.removeService'))
           .fontSize(13)
-          .fontColor('#D13438')
-          .backgroundColor(this.fieldColor())
+          .fontColor(this.confirmingRemove ? Color.White : '#D13438')
+          .backgroundColor(this.confirmingRemove ? '#D13438' : this.fieldColor())
           .layoutWeight(1)
           .enabled(this.initialConfigs.type !== SyncService.None)
           .onClick(() => {
+            if (!this.confirmingRemove) {
+              this.confirmingRemove = true;
+              return;
+            }
             this.onRemove();
             this.closeDialog();
           })

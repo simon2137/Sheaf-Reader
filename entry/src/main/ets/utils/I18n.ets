@@ -113,6 +113,9 @@ export class I18n {
     'app.cachedArticles': 'Cached articles: {count}',
     'app.syncNow': 'Sync now',
     'app.removeService': 'Remove service',
+    'app.removeServiceConfirm': 'Remove for good',
+    'app.removeServiceDeletes':
+      'Removing the service also deletes its {count} subscription(s) and their articles',
     'app.save': 'Save',
     'app.builtinViewHint': 'Otherwise the system browser is used',
     'app.nothingSelected': 'Nothing selected',
@@ -262,6 +265,8 @@ export class I18n {
     'app.cachedArticles': '已缓存文章：{count}',
     'app.syncNow': '立即同步',
     'app.removeService': '移除服务',
+    'app.removeServiceConfirm': '确认移除',
+    'app.removeServiceDeletes': '移除服务会同时删除该服务下的 {count} 个订阅源及其文章',
     'app.save': '保存',
     'app.builtinViewHint': '否则将使用系统浏览器',
     'app.nothingSelected': '未选择任何内容',

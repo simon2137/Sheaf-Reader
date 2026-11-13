@@ -772,18 +772,27 @@ export class DatabaseManager {
   }
 
   /**
-   * Drop the remote association from every feed and article. Used when the
-   * sync service is disconnected; keeps the downloaded content.
+   * Delete every feed the sync service owns, together with its articles.
+   * Used when the service is disconnected: those subscriptions came from the
+   * service, and a locally kept copy would only reappear on the next sync,
+   * since the service stays the source of truth for the feeds it manages.
    */
-  async unlinkAllServiceFeeds(): Promise<void> {
+  async deleteServiceFeeds(): Promise<void> {
     if (!this.store) return;
-    const feedPredicates = new relationalStore.RdbPredicates('feeds');
-    const feedValues: relationalStore.ValuesBucket = { service_ref: '' };
-    await this.store.update(feedValues, feedPredicates);
+    const linked: Map<string, Feed> = await this.getServiceLinkedFeeds();
+    const ids: number[] = [];
+    linked.forEach((feed: Feed) => {
+      ids.push(feed.id);
+    });
+    if (ids.length === 0) return;
 
     const articlePredicates = new relationalStore.RdbPredicates('articles');
-    const articleValues: relationalStore.ValuesBucket = { service_ref: '' };
-    await this.store.update(articleValues, articlePredicates);
+    articlePredicates.in('feed_id', ids);
+    await this.store.delete(articlePredicates);
+
+    const feedPredicates = new relationalStore.RdbPredicates('feeds');
+    feedPredicates.in('id', ids);
+    await this.store.delete(feedPredicates);
   }
 
   // ========== Group Operations ==========
