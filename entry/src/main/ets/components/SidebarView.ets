@@ -440,7 +440,8 @@ export struct SidebarView {
           .layoutWeight(1)
 
         // Notification status. Turns red while there are unacknowledged
-        // entries, so a failing source cannot pass unnoticed.
+        // *problems* in the log (a failed source or sync), so it means "look at
+        // this" rather than "something arrived"; ordinary entries light nothing.
         Button({ type: ButtonType.Circle }) {
           Stack() {
             Image($r('app.media.ic_notify'))

@@ -8,9 +8,18 @@ import { I18n } from './I18n';
  * Pure string work, so the query construction is unit-testable.
  */
 export class SearchEngines {
-  /** Display order, matching the original's menu. */
+  /**
+   * Menu order: Bing, Baidu, DuckDuckGo, Google.
+   *
+   * The stored value is `SearchEngine`'s number, not a position, so this order
+   * is display-only and older settings keep pointing at the same engine. It is
+   * reordered away from the original's list because the app is used where
+   * Google cannot be reached: an engine the reader cannot open does not belong
+   * at the top of a menu that is meant to be used in one tap. The other three
+   * keep their relative order.
+   */
   static readonly ALL: number[] = [
-    SearchEngine.Google, SearchEngine.Bing, SearchEngine.Baidu, SearchEngine.DuckDuckGo
+    SearchEngine.Bing, SearchEngine.Baidu, SearchEngine.DuckDuckGo, SearchEngine.Google
   ];
 
   /** Catalogue key for an engine's display name. */

@@ -29,7 +29,7 @@
         "day": "{d}天"
     },
     "log": {
-        "empty": "无消息",
+        "empty": "暂无通知",
         "fetchFailure": "无法加载订阅源“{name}”",
         "fetchSuccess": "成功加载 {count} 篇文章",
         "networkError": "连接订阅源时出错",
@@ -40,7 +40,7 @@
         "menu": "菜单",
         "refresh": "刷新",
         "markAllRead": "全部标为已读",
-        "notifications": "消息",
+        "notifications": "通知",
         "view": "视图",
         "settings": "选项",
         "minimize": "最小化",

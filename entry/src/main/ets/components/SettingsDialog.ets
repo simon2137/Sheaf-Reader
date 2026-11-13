@@ -715,11 +715,6 @@ export struct SettingsDialog {
                 .fontColor(this.secondaryColor())
                 .width('100%')
                 .margin({ top: 2 })
-              Text(I18n.get('app.aboutAuthor') + ' simon2137')
-                .fontSize(11)
-                .fontColor(this.secondaryColor())
-                .width('100%')
-                .margin({ top: 2 })
             }
             .layoutWeight(1)
             .alignItems(HorizontalAlign.Start)

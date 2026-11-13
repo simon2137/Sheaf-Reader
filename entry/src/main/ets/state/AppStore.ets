@@ -956,7 +956,11 @@ export class AppStore {
           new Map<string, string | number>([['name', failure.feedTitle]])),
         failure.message, -1);
     }
-    if (outcome.inserted > 0) {
+    // A manual refresh is an explicit act, so its outcome is worth a line. An
+    // automatic run stays quiet unless it has something to report: at a
+    // 30-minute interval the "fetched N articles" lines alone would fill the
+    // 200-entry ring in a few days and push the failures out of it.
+    if (outcome.inserted > 0 && !background) {
       this.addLog(AppLogType.Info,
         I18n.get('app.fetchedOk',
           new Map<string, string | number>([['count', outcome.inserted]])), '', -1);
@@ -987,11 +991,15 @@ export class AppStore {
   addLog(type: number, title: string, details: string, iid: number): void {
     // Reassign rather than push: only a property write on the @Observed store
     // is tracked.
-    this.logs = this.logs.concat([new AppLog(type, title, details, iid)]);
+    const entry: AppLog = new AppLog(type, title, details, iid);
+    this.logs = this.logs.concat([entry]);
     if (this.logs.length > AppStore.MAX_LOGS) {
       this.logs = this.logs.slice(this.logs.length - AppStore.MAX_LOGS);
     }
-    if (!this.logMenuDisplay) {
+    // Only a problem lights the dot. A 30-minute timer that red-dotted on every
+    // new article made the marker mean "something arrived", so a source failing
+    // in the same run went unnoticed anyway — the opposite of its purpose.
+    if (!this.logMenuDisplay && entry.isProblem()) {
       this.logNotify = true;
     }
   }
@@ -1010,16 +1018,6 @@ export class AppStore {
   clearLogs(): void {
     this.logs = [];
     this.logNotify = false;
-  }
-
-  problemCount(): number {
-    let count: number = 0;
-    for (const entry of this.logs) {
-      if (entry.isProblem()) {
-        count++;
-      }
-    }
-    return count;
   }
 
   /* ------------------------------------------------ sync service control */

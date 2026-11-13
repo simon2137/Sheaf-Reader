@@ -1,6 +1,6 @@
 import { Article, SourceTextDirection } from '../model/Models';
 import { SearchEngines } from '../utils/SearchEngines';
-import { ReaderBody, ReaderBlock } from '../utils/ReaderBody';
+import { ReaderBody, ReaderBlock, BodyBlockCache } from '../utils/ReaderBody';
 import { TouchTarget } from '../utils/TouchTarget';
 
 /**
@@ -148,13 +148,25 @@ export struct ArticleReaderView {
   @Prop viewBody: string;
 
   /**
+   * The parsed body, kept for as long as the body itself is unchanged. Not a
+   * state variable: it is derived from `viewBody` / `article`, and the view
+   * redraws because those changed, not because the cache did.
+   */
+  private bodyCache: BodyBlockCache = new BodyBlockCache();
+
+  /**
    * The body's paragraphs and inline images, in document order.
    *
    * The original renders the article HTML in a webview so pictures come along
    * with the text; ArkUI draws them from blocks instead.
+   *
+   * Parsed blocks are kept across rebuilds: `Article` is `@Observed` without
+   * `@Track`, so every article property this view does not even draw (the read
+   * and starred flags it toggles itself included) rebuilds the component, and
+   * re-splitting a long body each time costs several full-text regex passes.
    */
   private bodyBlocks(): ReaderBlock[] {
-    return ReaderBody.blocks(this.bodyHtml(), this.article.link);
+    return this.bodyCache.get(this.bodyHtml(), this.article.link);
   }
 
   /** The body markup the reader is showing, before it is split into blocks. */

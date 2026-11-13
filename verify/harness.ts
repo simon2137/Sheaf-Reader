@@ -24,7 +24,7 @@ import { ScopeFilter } from './src/utils/ScopeFilter';
 import { SourceFilter } from './src/utils/SourceFilter';
 import { SidebarState, SIDEBAR_BREAKPOINT, SIDEBAR_WIDTH } from './src/utils/SidebarState';
 import { FetchSchedule } from './src/utils/FetchSchedule';
-import { ReaderBody, ReaderBlock } from './src/utils/ReaderBody';
+import { ReaderBody, ReaderBlock, BodyBlockCache } from './src/utils/ReaderBody';
 import { TouchTarget } from './src/utils/TouchTarget';
 
 declare const require: (name: string) => any;
@@ -841,7 +841,11 @@ check('the language picker offers exactly two labels',
 // Switching locale actually changes the output
 I18n.useMessages('zh-CN', zhMessages, enMessages);
 check('Chinese messages are used once installed',
-  I18n.get('log.empty') === '无消息', I18n.get('log.empty'));
+  I18n.get('log.empty') === '暂无通知', I18n.get('log.empty'));
+// The panel is a fetch/notification log, not a message box: 消息 read like an
+// inbox and hid what the entries are actually about.
+check('the log panel is called notifications, not messages',
+  I18n.get('nav.notifications') === '通知', I18n.get('nav.notifications'));
 check('a key missing from Chinese falls back to English',
   I18n.get('nonexistent.key.only.in.en') === 'nonexistent.key.only.in.en');
 
@@ -1311,6 +1315,18 @@ check('every engine has a catalogue label key',
   SearchEngines.ALL.map(e => SearchEngines.labelKey(e)).join(','));
 check('all four engines are offered', SearchEngines.ALL.length === 4,
   String(SearchEngines.ALL.length));
+// Requested ordering: the menu opens on Bing and puts Google last, because the
+// app is used where Google is unreachable and a tap-to-open menu should not
+// lead with an engine that cannot load. The enum numbers are persisted in
+// settings, so only the display order may move — a reordered enum would silently
+// repoint every saved choice at a different engine.
+check('the engine menu leads with Bing and ends with Google',
+  SearchEngines.ALL[0] === SearchEngine.Bing
+  && SearchEngines.ALL[SearchEngines.ALL.length - 1] === SearchEngine.Google,
+  SearchEngines.ALL.map(e => SearchEngines.labelKey(e)).join(','));
+check('reordering the menu did not renumber the engines',
+  SearchEngine.Google === 0 && SearchEngine.Bing === 1
+  && SearchEngine.Baidu === 2 && SearchEngine.DuckDuckGo === 3);
 
 // --- "Search selected text": range -> query -> menu label --------------------
 // The selection menu hands back a TextRange measured against the rendered body,
@@ -2024,6 +2040,15 @@ check('a cold start and a warm tap both open the article',
 check('the notification is suppressed while the window is focused, as upstream does',
   appStoreSrc.indexOf('background && !this.windowFocused') >= 0
   && appStoreSrc.indexOf('windowFocused: boolean = true') >= 0);
+// The dot is an alarm, not a receipt. While `addLog` lit it for any entry, an
+// automatic refresh that merely inserted articles red-dotted the sidebar, so a
+// source failing in the same run was invisible — and "成功抓取 N 篇" lines alone
+// could fill the 200-entry ring and push the failures out of it.
+check('only a problem lights the notification dot',
+  appStoreSrc.indexOf('if (!this.logMenuDisplay && entry.isProblem())') >= 0
+  && appStoreSrc.indexOf('if (!this.logMenuDisplay) {') < 0);
+check('an automatic fetch does not log its success',
+  appStoreSrc.indexOf('if (outcome.inserted > 0 && !background)') >= 0);
 check('window focus comes from the window event, not a guess',
   indexPage.indexOf("host.on('windowEvent'") >= 0
   && indexPage.indexOf('window.WindowEventType.WINDOW_ACTIVE') >= 0
@@ -2173,7 +2198,58 @@ check('the reader renders body blocks instead of a single text run',
   && readerPage.indexOf('Image(block.value)') >= 0
   && readerPage.indexOf('Text(block.value)') >= 0);
 check('relative images are resolved against the article link',
-  readerPage.indexOf('ReaderBody.blocks(this.bodyHtml(), this.article.link)') >= 0);
+  readerPage.indexOf('this.bodyCache.get(this.bodyHtml(), this.article.link)') >= 0);
+// The body parse used to run inside `build()` on every rebuild. `Article` is
+// `@Observed` without `@Track`, so starring or reading the article rebuilt the
+// reader — and re-split the whole HTML, several regex passes over hundreds of
+// kilobytes, for a keystroke-sized visual change. The parse now sits behind a
+// cache that the rebuild compares against, so the view must never call
+// `ReaderBody.blocks` directly again.
+check('the reader parses the body through the cache, not inside build()',
+  readerPage.indexOf('private bodyCache: BodyBlockCache = new BodyBlockCache();') >= 0
+  && readerPage.indexOf('return this.bodyCache.get(this.bodyHtml(), this.article.link);') >= 0
+  && readerPage.indexOf('ReaderBody.blocks(') < 0);
+// Behaviour of that cache, which the view wiring alone cannot show. Every miss
+// returns a freshly built array, so keeping the same instance is exactly the
+// proof that the body was not parsed again.
+const bodyCache = new BodyBlockCache();
+const cacheHtml = '<p>First.</p><img src="/a.png">';
+const cacheHit: ReaderBlock[] = bodyCache.get(cacheHtml, base);
+check('a cache hit hands back the very blocks it parsed before',
+  bodyCache.get(cacheHtml, base) === cacheHit
+  && kindsOf(cacheHit) === 'TI'
+  && cacheHit[1].value === 'https://blog.example.com/a.png');
+check('a changed body is parsed again',
+  (() => {
+    const next = bodyCache.get('<p>Second.</p>', base);
+    return next !== cacheHit && kindsOf(next) === 'T' && next[0].value === 'Second.';
+  })());
+// The link matters as much as the text: it is what relative image URLs resolve
+// against, so the same markup under a new article URL is a different parse.
+check('the same body under a new article link is parsed again',
+  (() => {
+    const c = new BodyBlockCache();
+    const first = c.get('<img src="/a.png">', base);
+    const second = c.get('<img src="/a.png">', 'https://other.test/x.html');
+    return first !== second
+      && first[0].value === 'https://blog.example.com/a.png'
+      && second[0].value === 'https://other.test/a.png';
+  })());
+// An empty body parses to no blocks at all, which looks exactly like a cache
+// that never got filled; storing that emptiness is the point, or a body with
+// nothing to draw would be re-parsed on every rebuild.
+check('a body that parses to nothing stays cached',
+  (() => {
+    const c = new BodyBlockCache();
+    const empty = c.get('', base);
+    return empty.length === 0 && c.get('', base) === empty;
+  })());
+check('the cache keeps a body whose only image has no usable source',
+  (() => {
+    const c = new BodyBlockCache();
+    const none = c.get('<img alt="x">', '');
+    return none.length === 0 && c.get('<img alt="x">', '') === none;
+  })());
 check('the reader draws a Video for video blocks, with the poster as placeholder',
   readerPage.indexOf('} else if (block.kind === ReaderBody.VIDEO) {') >= 0
   && readerPage.indexOf('Video({ src: block.value, previewUri: block.poster })') >= 0
@@ -2582,10 +2658,33 @@ check('the bundled notice keeps both licences',
   licenceText.indexOf('BSD 3-Clause License') >= 0
   && licenceText.indexOf('Apache License') >= 0
   && licenceText.indexOf('yang991178') >= 0);
-check('the policy states what the app actually does',
-  privacyText.indexOf('ohos.permission.INTERNET') >= 0
-  && privacyText.indexOf('Miniflux') >= 0
-  && privacyText.indexOf('Sheaf-Reader/issues') >= 0);
+// 许可正文字数不能动，但折行同样交给控件（见 privacy-policy 那条）。手工折行总会
+// 停在逗号、顿号、分号或英文逗号后面；列表项以「· 」开头、以「；」收尾，是文本
+// 本身的标点，不算折行线索。
+check('the bundled licence notice is not hard-wrapped',
+  !/[，、]\s*\n/.test(licenceText)
+  && licenceText.split('\n')
+    .filter((line: string) => line.trim().length > 0 && line.trim().indexOf('· ') !== 0)
+    .every((line: string) => !/[，、；,;]$/.test(line.trim())));
+check('the bundled policy mirrors the AGC agreement',
+  privacyText.indexOf('关于束阅与隐私的声明') >= 0
+  && privacyText.indexOf('273156878@qq.com') >= 0
+  && privacyText.indexOf('中国境内') >= 0
+  && privacyText.indexOf('https://github.com/simon2137/Sheaf-Reader') >= 0);
+check('the repo copy states the same policy as the shipped text',
+  fs.readFileSync('../docs/privacy-policy.md', 'utf8').indexOf('关于束阅与隐私的声明') >= 0
+  && fs.readFileSync('../docs/privacy-policy.md', 'utf8').indexOf('273156878@qq.com') >= 0
+  && fs.readFileSync('../docs/privacy-policy.md', 'utf8').indexOf('生效日期：2026.11.1') >= 0);
+// 纯文本正文里的换行交给控件按窗口宽度做。手工折到固定列宽后，窗口一宽就是
+// 半行空白，字号一调又二次折行（2026-11-13 实机截图）。所以：一段正文必须是
+// 一个逻辑行，块与块之间空行；只有「邮箱 / 项目主页」这两行是并列的一小段。
+check('the bundled policy keeps one paragraph per line',
+  privacyText.split(/\n\s*\n/).every((block: string) => {
+    const lines: string[] = block.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0);
+    return lines.length <= 1
+      || lines.every((l: string) => l.indexOf('邮箱：') === 0 || l.indexOf('项目主页与问题反馈：') === 0);
+  })
+  && !/[，、；]\s*\n/.test(privacyText));
 
 const i18nFiles: string[] = fs.readdirSync(rawfileRoot + '/i18n') as string[];
 const i18nDecl: string = fs.readFileSync(etsRoot + '/utils/I18n.ets', 'utf8');
@@ -2770,11 +2869,14 @@ check('importAll writes it back after the settings',
 check('a restore rebuilds the page instead of waiting for a relaunch',
   indexSource.indexOf("router.replaceUrl({ url: 'pages/Index' })") >= 0
   && indexSource.indexOf('await this.reloadPage();') >= 0);
-section('the About block names the author and links the repository');
+section('the About block links the repository');
 check('the upstream port credit is gone', settingsPanel.indexOf('Ported from') < 0);
-check('the author is named with the catalogue label',
-  settingsPanel.indexOf("I18n.get('app.aboutAuthor')") >= 0
-  && settingsPanel.indexOf('simon2137') >= 0);
+// 关于里只留版本号：作者署名已按要求撤掉，标签连同它的 i18n key 一起删除，
+// 免得留下一句「作者」的空行。
+check('no author credit is shown in the About block',
+  settingsPanel.indexOf('app.aboutAuthor') < 0
+  && settingsPanel.indexOf('simon2137') < 0
+  && i18nDecl.indexOf('app.aboutAuthor') < 0);
 check('a repository link sits beside the two documents',
   settingsPanel.indexOf("I18n.get('app.repository')") >= 0
   && settingsPanel.indexOf('this.onOpenRepository()') >= 0);

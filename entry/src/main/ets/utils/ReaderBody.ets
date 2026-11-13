@@ -224,3 +224,43 @@ export class ReaderBody {
     return fallback.trim();
   }
 }
+
+/**
+ * Remembers the blocks parsed from one body, so a rebuild that did not change
+ * the body reuses them instead of parsing the article again.
+ *
+ * The reader rebuilds whenever anything it observes changes, and `Article` is
+ * `@Observed` without `@Track`, so flipping the star or the read flag on the
+ * very article being read re-runs its `build()` even though the body is
+ * untouched. `blocks()` walks the whole HTML several times (script/style
+ * removal, block-tag breaks, media extraction, entity decoding), which on a
+ * long article is real work per tap; a hit here costs only the two comparisons.
+ *
+ * The inputs are compared directly instead of being joined into a key: joining
+ * would copy the whole article HTML on every rebuild, which is the very
+ * allocation the cache exists to avoid.
+ *
+ * `valid` is a flag rather than a test on `blocks.length` because a body can
+ * legitimately parse to nothing (blank text, only unusable image references),
+ * and such a body has to stay cached too or every rebuild parses it again.
+ */
+export class BodyBlockCache {
+  private html: string = '';
+  private link: string = '';
+  private blocks: ReaderBlock[] = [];
+  private valid: boolean = false;
+
+  /**
+   * The blocks for this body, parsed only when `html` or the base URL changed.
+   * The returned array is kept, so unchanged input returns the same instance.
+   */
+  get(html: string, link: string): ReaderBlock[] {
+    if (!this.valid || html !== this.html || link !== this.link) {
+      this.blocks = ReaderBody.blocks(html, link);
+      this.html = html;
+      this.link = link;
+      this.valid = true;
+    }
+    return this.blocks;
+  }
+}
