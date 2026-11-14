@@ -2863,9 +2863,28 @@ check('the backup shape has a service field',
   backupSource.indexOf('service: string = ' + "''" + ';') >= 0
   && backupSource.indexOf('service: string;') >= 0);
 check('exportAll stores the live service configuration',
-  backupSource.indexOf('backup.service = ServiceConfigs.toJson(await SyncManager.loadConfigs())') >= 0);
+  backupSource.indexOf('service: ServiceConfigs.toJson(await SyncManager.loadConfigs())') >= 0);
 check('importAll writes it back after the settings',
   backupSource.indexOf('await SyncManager.saveConfigs(ServiceConfigs.fromJson(parsed.service))') >= 0);
+check('restore falls back to the legacy service_configs settings row',
+  backupSource.indexOf('parsed.settings.get(SyncManager.SETTING_KEY)') >= 0);
+
+section('a backup carries the settings, not an empty object');
+check('exportAll flattens the settings map before serialising',
+  backupSource.indexOf('settings: BackupService.settingsToRecord(await BackupService.db.getAllSettings())') >= 0
+  && backupSource.indexOf('return JSON.stringify(payload);') >= 0);
+check('the settings map no longer reaches JSON.stringify directly',
+  backupSource.indexOf('JSON.stringify(backup)') < 0);
+const flattened: Record<string, string> = {};
+new Map<string, string>([['fontSize', '18'], ['locale', 'zh-CN']])
+  .forEach((value: string, key: string) => {
+    flattened[key] = value;
+  });
+const flattenedJson: string = JSON.stringify({ settings: flattened });
+check('a flattened map serialises with its keys',
+  flattenedJson.indexOf('"fontSize":"18"') >= 0 && flattenedJson.indexOf('"locale":"zh-CN"') >= 0);
+check('the same map would have serialised as an empty object',
+  JSON.stringify({ settings: new Map<string, string>([['fontSize', '18']]) }) === '{"settings":{}}');
 check('a restore rebuilds the page instead of waiting for a relaunch',
   indexSource.indexOf("router.replaceUrl({ url: 'pages/Index' })") >= 0
   && indexSource.indexOf('await this.reloadPage();') >= 0);

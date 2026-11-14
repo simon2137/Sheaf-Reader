@@ -69,14 +69,33 @@ export class BackupService {
    * alongside `feeds`; restore re-points them at the ids it assigns.
    */
   static async exportAll(): Promise<string> {
-    const backup: BackupFile = new BackupFile();
-    backup.exportedAt = Date.now();
-    backup.settings = await BackupService.db.getAllSettings();
-    backup.service = ServiceConfigs.toJson(await SyncManager.loadConfigs());
-    backup.groups = await BackupService.db.getAllGroups();
-    backup.feeds = await BackupService.db.getAllFeeds();
-    backup.articles = await BackupService.db.getAllArticles();
-    return JSON.stringify(backup);
+    const payload: BackupPayload = {
+      format: BackupFile.FORMAT,
+      version: BackupFile.CURRENT_VERSION,
+      exportedAt: Date.now(),
+      settings: BackupService.settingsToRecord(await BackupService.db.getAllSettings()),
+      groups: await BackupService.db.getAllGroups(),
+      feeds: await BackupService.db.getAllFeeds(),
+      articles: await BackupService.db.getAllArticles(),
+      service: ServiceConfigs.toJson(await SyncManager.loadConfigs())
+    };
+    return JSON.stringify(payload);
+  }
+
+  /**
+   * Flatten the settings map before serialising.
+   *
+   * `JSON.stringify` renders a `Map` as `{}`, so a BackupFile stringified as-is
+   * carried no preferences at all: the file read `"settings":{}` and a restore
+   * wrote nothing back, while the panel claimed preferences were included.
+   * `toSettings` already rebuilds the map on the way in.
+   */
+  static settingsToRecord(settings: Map<string, string>): Record<string, string> {
+    const record: Record<string, string> = {};
+    settings.forEach((value: string, key: string) => {
+      record[key] = value;
+    });
+    return record;
   }
 
   /**
@@ -242,10 +261,18 @@ export class BackupService {
     //    library.
     await BackupService.db.setSettings(parsed.settings);
 
-    // 6. The sync-service configuration. Older backups do not carry it, in
-    //    which case whatever the settings row held above stays in place.
+    // 6. The sync-service configuration. Newer backups carry it in `service`,
+    //    which wins because it is what the panel saved. Files written before
+    //    that field existed only carried the `service_configs` settings row,
+    //    which step 5 has just written — re-apply it so the running config
+    //    matches it instead of waiting for the next launch.
     if (parsed.service.length > 0) {
       await SyncManager.saveConfigs(ServiceConfigs.fromJson(parsed.service));
+    } else {
+      const legacy: string | undefined = parsed.settings.get(SyncManager.SETTING_KEY);
+      if (legacy !== undefined && legacy.length > 0) {
+        await SyncManager.saveConfigs(ServiceConfigs.fromJson(legacy));
+      }
     }
 
     outcome.ok = true;
