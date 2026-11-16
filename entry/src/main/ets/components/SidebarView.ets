@@ -248,7 +248,9 @@ export struct SidebarView {
   /**
    * The "unread sources only" filter (the original's `unreadSourcesOnly`): with
    * it on, empty sources disappear and a group disappears once all of its
-   * sources are empty. The rule itself lives in `SourceFilter` so it can be
+   * sources are read. A group with no sources at all stays listed — a freshly
+   * created group is empty, and hiding it left nothing to assign sources to,
+   * rename or delete. The rule itself lives in `SourceFilter` so it can be
    * asserted without a device.
    */
   private visibleGroups(): FeedGroup[] {

@@ -1564,7 +1564,8 @@ check('Escape still leaves the reader', /KEYCODE_ESCAPE\b/.test(indexSource));
 
 // --- Sidebar "unread sources only" filter ------------------------------------
 // With the filter on, empty sources disappear and a group disappears once all of
-// its sources are empty; with it off nothing is hidden.
+// its sources are read; a group with no sources at all (a freshly created one)
+// is always listed, and with it off nothing is hidden.
 section('Sidebar unread-sources filter');
 function sf(id: number, unreadCount: number): Feed {
   const feed = new Feed();
@@ -1593,8 +1594,11 @@ check('a group with an unread source is listed',
   SourceFilter.groupVisible(sfFeeds, true));
 check('a group whose sources are all read is hidden',
   !SourceFilter.groupVisible([sf(1, 0), sf(3, 0)], true));
-check('an empty group is hidden while filtering',
-  !SourceFilter.groupVisible([], true));
+// A group created by hand starts empty. Hiding it under the filter made the
+// "created" toast report a group that was not on screen and could not be
+// reached at all, so an empty group is always listed.
+check('an empty group is listed while filtering',
+  SourceFilter.groupVisible([], true));
 check('an empty group is listed when not filtering',
   SourceFilter.groupVisible([], false));
 

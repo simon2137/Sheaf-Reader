@@ -26,11 +26,22 @@ export class SourceFilter {
   }
 
   /**
-   * Whether a group is listed: with the filter on it needs at least one source
-   * with unread articles, so an emptied group does not linger as a header.
+   * Whether a group is listed.
+   *
+   * A group with sources is listed only while one of them has unread articles,
+   * which is the rule the original's `menu.tsx` applies to a group's contents.
+   *
+   * A group with **no** sources is always listed. The filter is a statement
+   * about sources — "hide the ones with nothing unread" — and an empty group has
+   * no source to be read or unread, so there is nothing for it to hide. Hiding
+   * it made a group created by hand vanish the moment the "created" toast
+   * appeared: new groups start empty, and with the filter on there was no row to
+   * assign sources to, rename or delete, so the group was unreachable until the
+   * filter was switched off. Listing it also keeps an emptied group visible as
+   * something to delete or refill.
    */
   static groupVisible(feeds: Feed[], unreadOnly: boolean): boolean {
-    if (!unreadOnly) {
+    if (!unreadOnly || feeds.length === 0) {
       return true;
     }
     for (const feed of feeds) {
