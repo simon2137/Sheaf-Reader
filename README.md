@@ -11,7 +11,7 @@
 [![AI](https://img.shields.io/badge/AI%20ported%20by-DeepSeek%20%2B%20DSH-8A2BE2.svg)](#这是一个-ai-移植项目)
 
 **已上架华为 AppGallery**：[束阅 Sheaf Reader](https://appgallery.huawei.com/app/detail?id=com.sheafreader.app&channelId=SHARE&source=appshare)
-（包名 `com.sheafreader.app`，适配平板与 2-in-1，1.0.8 起可在应用市场直接安装）。
+（包名 `com.sheafreader.app`，适配平板与 2-in-1，可在应用市场直接安装）。
 
 ---
 
