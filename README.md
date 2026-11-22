@@ -6,8 +6,12 @@
 
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-HarmonyOS%20NEXT%205.0.0-blue.svg)](#构建)
+[![AppGallery](https://img.shields.io/badge/AppGallery-available-CF0A2C.svg)](https://appgallery.huawei.com/app/detail?id=com.sheafreader.app&channelId=SHARE&source=appshare)
 [![Upstream](https://img.shields.io/badge/Upstream-Fluent%20Reader-orange.svg)](https://github.com/yang991178/fluent-reader)
 [![AI](https://img.shields.io/badge/AI%20ported%20by-DeepSeek%20%2B%20DSH-8A2BE2.svg)](#这是一个-ai-移植项目)
+
+**已上架华为 AppGallery**：[束阅 Sheaf Reader](https://appgallery.huawei.com/app/detail?id=com.sheafreader.app&channelId=SHARE&source=appshare)
+（包名 `com.sheafreader.app`，适配平板与 2-in-1，1.0.8 起可在应用市场直接安装）。
 
 ---
 
@@ -21,7 +25,7 @@
 - **"移植"的含义**：功能语义、界面相对布局（结构 / 顺序 / 层级 / 操作位次）、数据模型与设置项语义**以上游为蓝本逐项对齐**；
   代码本身是用 ArkTS / ArkUI **重新实现**，不搬运上游 TypeScript 源码。
 - **验证方式**：任何"已完成"都以设备取证为准（`hdc` 的 `dumpLayout` / 截图 / mock 服务端日志），
-  另有 `verify/harness.ts` 的 **616 条**断言跑在**实际发布的源码**上。
+  另有 `verify/harness.ts` 的 **621 条**断言跑在**实际发布的源码**上。
 - **许可**：BSD-3-Clause，保留上游版权声明；派生范围、改名记录与第三方组件见 [NOTICE](NOTICE)。
   本项目为个人非官方移植，与上游作者、与华为均无隶属或背书关系。
 
@@ -78,7 +82,7 @@ hvigorw --mode module -p product=default assembleHap --no-daemon
 ## 验证
 
 ```powershell
-pwsh -File verify/run.ps1      # 616 条断言，跑在实际发布的源码上
+pwsh -File verify/run.ps1      # 621 条断言，跑在实际发布的源码上
 ```
 
 脚本把 `entry/src/main/ets` 下的发布源码转成 TS，在 Node 下断言解析、筛选与规则、i18n、抓取排程、通知深链、
